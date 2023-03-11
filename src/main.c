@@ -7,7 +7,7 @@
 
 #include "gpio.h"
 #include "mapping.h"
-#include "scb_reg.h"
+#include "nvic.h"
 #include "types.h"
 
 /* MAIN FUNCTION.
@@ -18,8 +18,7 @@ int main(void) {
 	// Local variavles.
 	uint32_t i = 0;
 	// Init vector.
-	extern void(*const g_pfnVectors[]) (void);
-	SCB -> VTOR = (uint32_t) &g_pfnVectors;
+	NVIC_init();
 	// Init peripherals.
 	GPIO_init();
 	// Configure LED pin.
