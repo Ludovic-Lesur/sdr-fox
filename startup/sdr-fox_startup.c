@@ -443,13 +443,6 @@ void ResetISR(void) {
 #else
     main();
 #endif
-
-    //
-    // main() shouldn't return, but if it does, we'll just enter an infinite loop
-    //
-    while (1) {
-        ;
-    }
 }
 
 //*****************************************************************************
@@ -500,8 +493,11 @@ WEAK_AV void SysTick_Handler(void)
 // Processor ends up here if an unexpected interrupt occurs or a specific
 // handler is not present in the application code.
 //*****************************************************************************
-WEAK_AV void IntDefaultHandler(void)
-{ while(1) {}
+WEAK_AV void IntDefaultHandler(void) {
+	// Enter sleep mode.
+	while (1) {
+		__asm volatile ("wfi");
+	}
 }
 
 //*****************************************************************************

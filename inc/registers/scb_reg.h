@@ -56,10 +56,10 @@ typedef struct {
 	volatile uint32_t DCCIMVAC;			// D-Cache Clean and Invalidate by MVA to PoC.
 	volatile uint32_t DCCISW;			// D-Cache Clean and Invalidate by Set-way.
 	volatile uint32_t BPIALL;			// Branch Predictor Invalidate All.
-} SCB_base_address_t;
+} SCB_registers_t;
 
 /*** SYSCON base address ***/
 
-#define SCB		((SCB_base_address_t*) ((uint32_t) 0xE000ED00))
+#define SCB		((SCB_registers_t*) ((uint32_t) 0xE000ED00))
 
 #endif /* __SCB_REG_H__ */

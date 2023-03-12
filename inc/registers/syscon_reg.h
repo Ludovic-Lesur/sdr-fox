@@ -184,10 +184,10 @@ union {												// offset: 0x200.
 	uint8_t RESERVED_40[32];
 	volatile  uint32_t DEVICE_ID0;					// Device ID, offset: 0xFF8.
 	volatile  uint32_t DIEID;						// Chip revision ID and Number, offset: 0xFFC.
-} SYSCON_base_address_t;
+} SYSCON_registers_t;
 
 /*** SYSCON base address ***/
 
-#define SYSCON	((SYSCON_base_address_t*) ((uint32_t) 0x40000000))
+#define SYSCON	((SYSCON_registers_t*) ((uint32_t) 0x40000000))
 
 #endif /* __SYSCON_REG_H__ */

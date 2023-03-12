@@ -8,6 +8,7 @@
 #include "gpio.h"
 #include "mapping.h"
 #include "nvic.h"
+#include "syscon.h"
 #include "types.h"
 
 /* MAIN FUNCTION.
@@ -15,12 +16,14 @@
  * @return:	None.
  */
 int main(void) {
-	// Local variavles.
+	// Local variables.
 	uint32_t i = 0;
 	// Init vector.
 	NVIC_init();
 	// Init peripherals.
 	GPIO_init();
+	// Init clock.
+	SYSCON_init_clock();
 	// Configure LED pin.
 	GPIO_configure(&GPIO_LED_RED, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);
 	GPIO_configure(&GPIO_LED_GREEN, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);

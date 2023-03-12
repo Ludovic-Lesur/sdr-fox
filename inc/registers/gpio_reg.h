@@ -36,10 +36,10 @@ typedef struct {
 	volatile  uint32_t DIRCLR[2];	// Clear pin direction bits for port, array offset: 0x2400, array step: 0x4.
 	uint8_t RESERVED_10[120];
 	volatile  uint32_t DIRNOT[2];	// Toggle pin direction bits for port, array offset: 0x2480, array step: 0x4.
-} GPIO_base_address_t;
+} GPIO_registers_t;
 
 /*** GPIO base address ***/
 
-#define GPIO	((GPIO_base_address_t*) ((uint32_t) 0x4008C000))
+#define GPIO	((GPIO_registers_t*) ((uint32_t) 0x4008C000))
 
 #endif /* __GPIO_REG_H__ */

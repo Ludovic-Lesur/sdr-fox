@@ -25,13 +25,13 @@ typedef struct {
 	uint32_t RESERVED4[16];
 	volatile uint32_t ITNS[16];		// Interrupt Non-Secure State Register.
 	uint32_t RESERVED5[16];
-	volatile uint8_t IPR[496];		// Interrupt Priority Register (8Bit wide).
+	volatile uint8_t IPR[496];		// Interrupt Priority Register (8-bits wide).
 	uint32_t RESERVED6[580];
 	volatile  uint32_t STIR;		// Software Trigger Interrupt Register.
-} NVIC_base_address_t;
+} NVIC_registers_t;
 
 /*** NVIC base address ***/
 
-#define NVIC	((NVIC_base_address_t*) ((unsigned int) 0xE000E100))
+#define NVIC	((NVIC_registers_t*) ((uint32_t) 0xE000E100))
 
 #endif /* __NVIC_REG_H__ */
