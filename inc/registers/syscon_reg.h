@@ -10,6 +10,8 @@
 
 #include "types.h"
 
+/*** SYSCON registers ***/
+
 typedef struct {
 	volatile uint32_t MEMORYREMAP;					// Memory Remap control register, offset: 0x0.
 	uint8_t RESERVED_0[12];

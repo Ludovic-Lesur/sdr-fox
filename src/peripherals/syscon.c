@@ -26,23 +26,62 @@
 
 /*** SYSCON local functions ***/
 
-/* ENABLE EXTERNAL 16MHZ CRYSTAL AND INTERNAL OSCILLATOR.
+/* ENABLE INTERNAL OSCILLATOR.
+ * @param:	None.
+ * @return:	None.
+ */
+void _SYSCON_enable_fro(void) {
+	// Power FRO 12MHz.
+	PMC -> PDRUNCFGCLR0 = (0b1 << 5);
+	// Enable 12MHz clock.
+	ANACTRL -> FRO192M_CTRL |= (0b1 << 14);
+	// Enable 1MHz.
+	SYSCON -> CLOCK_CTRL |= (0b1 << 6);
+}
+
+/* ENABLE 32KHZ CLOCK.
  * @param:			None.
  * @return status:	Function execution status.
  */
-SYSCON_status_t _SYSCON_enable_xo(void) {
+SYSCON_status_t _SYSCON_enable_32k_osc(void) {
 	// Local variables.
 	SYSCON_status_t status = SYSCON_SUCCESS;
 	uint32_t loop_count = 0;
-	// Power external crystal.
+	// Power external low-speed crystal.
+	PMC -> PDRUNCFGCLR0 = (0b1 << 7);
+	PMC -> RTCOSC32K |= (0b1 << 0);
+	// Wait for crystal to be stable.
+	while (((PMC -> STATUSCLK) & (0b1 << 0)) == 0) {
+		loop_count++;
+		if (loop_count > SYSCON_TIMEOUT_COUNT) {
+			status = SYSCON_ERROR_32K_OSC_TIMEOUT;
+			goto errors;
+		}
+	}
+errors:
+	return status;
+}
+
+/* ENABLE EXTERNAL CRYSTAL OSCILLATOR.
+ * @param:			None.
+ * @return status:	Function execution status.
+ */
+SYSCON_status_t _SYSCON_enable_clk_in(void) {
+	// Local variables.
+	SYSCON_status_t status = SYSCON_SUCCESS;
+	uint32_t loop_count = 0;
+	// Power external high-speed crystal.
 	PMC -> PDRUNCFGCLR0 = (0b1 << 8) | (0b1 << 20);
 	SYSCON -> CLOCK_CTRL |= (0b1 << 5);
-	ANACTRL -> XO32M_CTRL |= (0b11 << 23);
 	// Wait for crystal to be stable.
 	while (((ANACTRL -> XO32M_STATUS) & (0b1 << 0)) == 0) {
-
+		loop_count++;
+		if (loop_count > SYSCON_TIMEOUT_COUNT) {
+			status = SYSCON_ERROR_CLK_IN_TIMEOUT;
+			goto errors;
+		}
 	}
-	// Return.
+errors:
 	return status;
 }
 
@@ -50,11 +89,7 @@ SYSCON_status_t _SYSCON_enable_xo(void) {
  * @param:	None.
  * @return:	None.
  */
-void _SYSCON_switch_to_fro_12mhz(void) {
-	// Power FRO 12MHz.
-	PMC -> PDRUNCFGCLR0 = (0b1 << 5);
-	// Enable 12MHz clock.
-	ANACTRL -> FRO192M_CTRL |= (0b1 << 14);
+void _SYSCON_switch_to_fro_12m(void) {
 	// Switch to FRO.
 	SYSCON -> MAINCLKSELA = 0x00;
 	SYSCON -> MAINCLKSELB = 0x00;
@@ -100,6 +135,7 @@ SYSCON_status_t _SYSCON_switch_to_pll1(void) {
 	// Power down PLL1 during configuration.
 	PMC -> PDRUNCFGSET0 = (0b1 << 10);
 	// Configure PLL1.
+	ANACTRL -> XO32M_CTRL |= (0b1 << 24);
 	SYSCON -> PLL1CLKSEL = 0x01; // External crystal source.
 	SYSCON -> PLL1CTRL = 0;
 	SYSCON -> PLL1CTRL |= (seli << 4) | (selp << 10) | (0b1 << 19) | (0b1 << 21); // Bypass pre-divider and enable output.
@@ -120,7 +156,7 @@ SYSCON_status_t _SYSCON_switch_to_pll1(void) {
 		}
 	}
 	// Switch main clock to PLL1.
-	SYSCON -> MAINCLKSELA = 0x00;
+	SYSCON -> MAINCLKSELA = 0x01;
 	SYSCON -> MAINCLKSELB = 0x02;
 errors:
 	return status;
@@ -140,13 +176,17 @@ SYSCON_status_t SYSCON_init_clock(void) {
 	SYSCON -> PRESETCTRLCLR[2] = (0b1 << 27);
 	SYSCON -> AHBCLKCTRLSET[2] = (0b1 << 27);
 	// Switch on internal clock by default.
-	_SYSCON_switch_to_fro_12mhz();
+	_SYSCON_enable_fro();
+	_SYSCON_switch_to_fro_12m();
 	// Output (main clock / 100) on CLKOUT pin.
 	SYSCON -> CLKOUTDIV = 0x64;
 	SYSCON -> CLKOUTSEL = 0x00;
 	GPIO_configure(&GPIO_CLKOUT, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_FAST, GPIO_PULL_NONE);
+	// Enable low speed crystal.
+	status = _SYSCON_enable_32k_osc();
+	if (status != SYSCON_SUCCESS) goto errors;
 	// Enable high speed crystal.
-	status = _SYSCON_enable_xo();
+	status = _SYSCON_enable_clk_in();
 	if (status != SYSCON_SUCCESS) goto errors;
 	// Set latency.
 	flash_status = FLASH_set_latency(8);

@@ -49,5 +49,10 @@ void NVIC_set_priority(NVIC_interrupt_t irq_index, uint8_t priority) {
 	// Check parameter.
 	if (priority > NVIC_PRIORITY_MIN) return;
 	// Set priority.
-	NVIC -> IPR[irq_index] |= (priority << 5);
+	if (irq_index >= 0) {
+		NVIC -> IPR[irq_index] = (priority << 5);
+	}
+	else {
+		SCB -> SHPR[(irq_index & 0x0F) - 4] = (priority << 5);
+	}
 }

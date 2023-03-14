@@ -9,6 +9,7 @@
 #include "mapping.h"
 #include "nvic.h"
 #include "syscon.h"
+#include "systick.h"
 #include "types.h"
 
 /* MAIN FUNCTION.
@@ -16,14 +17,13 @@
  * @return:	None.
  */
 int main(void) {
-	// Local variables.
-	uint32_t i = 0;
 	// Init vector.
 	NVIC_init();
 	// Init peripherals.
 	GPIO_init();
 	// Init clock.
 	SYSCON_init_clock();
+	SYSTICK_init();
 	// Configure LED pin.
 	GPIO_configure(&GPIO_LED_RED, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);
 	GPIO_configure(&GPIO_LED_GREEN, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);
@@ -31,11 +31,11 @@ int main(void) {
 	// Main loop.
 	while (1) {
 		GPIO_toggle(&GPIO_LED_RED);
-		for (i=0 ; i<1000000 ; i++);
+		SYSTICK_delay_milliseconds(1000);
 		GPIO_toggle(&GPIO_LED_GREEN);
-		for (i=0 ; i<1000000 ; i++);
+		SYSTICK_delay_milliseconds(1000);
 		GPIO_toggle(&GPIO_LED_BLUE);
-		for (i=0 ; i<1000000 ; i++);
+		SYSTICK_delay_milliseconds(1000);
 	}
 	return 0;
 }
