@@ -12,6 +12,7 @@
 #include "flash.h"
 #include "syscon.h"
 #include "systick.h"
+#include "usb_hs_phy.h"
 // Components.
 // Utils.
 #include "types.h"
@@ -24,10 +25,11 @@ typedef enum {
 	ERROR_BASE_FLASH = 0x100,
 	ERROR_BASE_SYSCON = (ERROR_BASE_FLASH + FLASH_ERROR_BASE_LAST),
 	ERROR_BASE_SYSTICK = (ERROR_BASE_SYSCON + SYSCON_ERROR_BASE_LAST),
+	ERROR_BASE_USB_HS_PHY = (ERROR_BASE_SYSTICK + SYSTICK_ERROR_BASE_LAST),
 	// Components.
 	// Utils.
 	// Last index.
-	ERROR_BASE_LAST = (ERROR_BASE_SYSTICK + SYSTICK_ERROR_BASE_LAST)
+	ERROR_BASE_LAST = (ERROR_BASE_USB_HS_PHY + USB_HS_PHY_ERROR_BASE_LAST)
 } ERROR_t;
 
 /*** ERROR functions ***/
