@@ -5,6 +5,7 @@
  *      Author: Ludo
  */
 
+#include "error.h"
 #include "gpio.h"
 #include "mapping.h"
 #include "nvic.h"
@@ -17,12 +18,16 @@
  * @return:	None.
  */
 int main(void) {
+	// Local variables.
+	SYSCON_status_t syscon_status = SYSCON_SUCCESS;
+	SYSTICK_status_t systick_status = SYSTICK_SUCCESS;
 	// Init vector.
 	NVIC_init();
 	// Init peripherals.
 	GPIO_init();
 	// Init clock.
-	SYSCON_init_clock();
+	syscon_status = SYSCON_init_clock();
+	SYSCON_error_check();
 	SYSTICK_init();
 	// Configure LED pin.
 	GPIO_configure(&GPIO_LED_RED, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);
@@ -31,11 +36,14 @@ int main(void) {
 	// Main loop.
 	while (1) {
 		GPIO_toggle(&GPIO_LED_RED);
-		SYSTICK_delay_milliseconds(1000);
+		systick_status = SYSTICK_delay_milliseconds(1000);
+		SYSTICK_error_check();
 		GPIO_toggle(&GPIO_LED_GREEN);
-		SYSTICK_delay_milliseconds(1000);
+		systick_status = SYSTICK_delay_milliseconds(1000);
+		SYSTICK_error_check();
 		GPIO_toggle(&GPIO_LED_BLUE);
-		SYSTICK_delay_milliseconds(1000);
+		systick_status = SYSTICK_delay_milliseconds(1000);
+		SYSTICK_error_check();
 	}
 	return 0;
 }

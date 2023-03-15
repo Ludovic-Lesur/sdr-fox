@@ -29,4 +29,8 @@ typedef enum {
 
 SYSCON_status_t SYSCON_init_clock(void);
 
+#define SYSCON_status_check(error_base) { if (syscon_status != SYSCON_SUCCESS) { status = error_base + syscon_status; goto errors; }}
+#define SYSCON_error_check() { ERROR_status_check(syscon_status, SYSCON_SUCCESS, ERROR_BASE_SYSCON); }
+#define SYSCON_error_check_print() { ERROR_status_check_print(syscon_status, SYSCON_SUCCESS, ERROR_BASE_SYSCON); }
+
 #endif /* __SYSCON_H__ */
