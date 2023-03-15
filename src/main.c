@@ -29,6 +29,8 @@ int main(void) {
 	syscon_status = SYSCON_init_clock();
 	SYSCON_error_check();
 	SYSTICK_init();
+	// Init USB interface.
+	USB_HS_PHY_init();
 	// Configure LED pin.
 	GPIO_configure(&GPIO_LED_RED, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);
 	GPIO_configure(&GPIO_LED_GREEN, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);

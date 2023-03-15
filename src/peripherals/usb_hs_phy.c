@@ -7,8 +7,8 @@
 
 #include "usb_hs_phy.h"
 
-#include "anactrl_reg.h"
-#include "pmc_reg.h"
+#include "anactrl.h"
+#include "pmc.h"
 #include "syscon_reg.h"
 #include "systick.h"
 #include "usb_hs_phy_reg.h"
@@ -22,11 +22,17 @@
 USB_HS_PHY_status_t USB_HS_PHY_init(void) {
 	// Local variables.
 	USB_HS_PHY_status_t status = USB_HS_PHY_SUCCESS;
+	PMC_status_t pmc_status = PMC_SUCCESS;
+	ANACTRL_status_t anactrl_status = ANACTRL_SUCCESS;
 	SYSTICK_status_t systick_status = SYSTICK_SUCCESS;
 	// Power.
-	PMC -> PDRUNCFGCLR0 = (0b1 << 12) | (0b1 << 18);
+	pmc_status = PMC_power_on(PMC_BLOCK_LDO_USB_HS);
+	PMC_status_check(USB_HS_PHY_ERROR_BASE_PMC);
+	pmc_status = PMC_power_on(PMC_BLOCK_USB_HS_PHY);
+	PMC_status_check(USB_HS_PHY_ERROR_BASE_PMC);
 	// Enable clock.
-	ANACTRL -> XO32M_CTRL |= (0b1 << 23);
+	anactrl_status = ANACTRL_enable_xo32m_output(ANACTRL_XO32M_OUTPUT_PLL_USB);
+	ANACTRL_status_check(USB_HS_PHY_ERROR_BASE_ANACTRL);
 	SYSCON -> AHBCLKCTRLSET[2] |= (0b1 << 7);
 	// Reset peripheral.
 	SYSCON -> PRESETCTRLSET[2] |= (0b1 << 7);
