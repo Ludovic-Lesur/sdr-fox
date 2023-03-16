@@ -9,7 +9,7 @@
 
 #include "anactrl.h"
 #include "pmc.h"
-#include "syscon_reg.h"
+#include "syscon.h"
 #include "systick.h"
 #include "usb_hs_phy_reg.h"
 
@@ -24,6 +24,7 @@ USB_HS_PHY_status_t USB_HS_PHY_init(void) {
 	USB_HS_PHY_status_t status = USB_HS_PHY_SUCCESS;
 	PMC_status_t pmc_status = PMC_SUCCESS;
 	ANACTRL_status_t anactrl_status = ANACTRL_SUCCESS;
+	SYSCON_status_t syscon_status = SYSCON_SUCCESS;
 	SYSTICK_status_t systick_status = SYSTICK_SUCCESS;
 	// Power.
 	pmc_status = PMC_power_on(PMC_BLOCK_LDO_USB_HS);
@@ -33,10 +34,11 @@ USB_HS_PHY_status_t USB_HS_PHY_init(void) {
 	// Enable clock.
 	anactrl_status = ANACTRL_enable_xo32m_output(ANACTRL_XO32M_OUTPUT_PLL_USB);
 	ANACTRL_status_check(USB_HS_PHY_ERROR_BASE_ANACTRL);
-	SYSCON -> AHBCLKCTRLSET[2] |= (0b1 << 7);
+	syscon_status = SYSCON_enable_peripheral(SYSCON_PERIPHERAL_USB1_PHY);
+	SYSCON_status_check(USB_HS_PHY_ERROR_BASE_SYSCON);
 	// Reset peripheral.
-	SYSCON -> PRESETCTRLSET[2] |= (0b1 << 7);
-	SYSCON -> PRESETCTRLCLR[2] |= (0b1 << 7);
+	syscon_status = SYSCON_reset_peripheral(SYSCON_PERIPHERAL_USB1_PHY);
+	SYSCON_status_check(USB_HS_PHY_ERROR_BASE_SYSCON);
 	USB_HS_PHY -> CTRL_CLR = (0b1 << 31);
 	// Set PLL for 16MHz crystal.
 	USB_HS_PHY -> PLL_SIC &= ~(0b111 << 22);

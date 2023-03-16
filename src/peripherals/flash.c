@@ -8,7 +8,6 @@
 #include "flash.h"
 
 #include "flash_reg.h"
-#include "syscon_reg.h"
 #include "types.h"
 
 /*** FLASH local macros ***/
@@ -46,9 +45,6 @@ FLASH_status_t FLASH_set_latency(uint8_t wait_states) {
 			goto errors;
 		}
 	}
-	// Set latency in SYSCON.
-	SYSCON -> FMCCR &= ~(0b1111 << 12);
-	SYSCON -> FMCCR |= ((wait_states & 0b1111) << 12);
 errors:
 	return status;
 }

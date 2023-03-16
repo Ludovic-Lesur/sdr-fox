@@ -8,6 +8,7 @@
 #include "anactrl.h"
 
 #include "anactrl_reg.h"
+#include "syscon.h"
 #include "types.h"
 
 /*** ANACTRL functions ***/

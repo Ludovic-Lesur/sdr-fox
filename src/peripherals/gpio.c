@@ -10,8 +10,7 @@
 #include "gpio_reg.h"
 #include "iocon_reg.h"
 #include "mapping.h"
-#include "syscon_reg.h"
-
+#include "syscon.h"
 
 /*** GPIO local functions ***/
 
@@ -180,7 +179,13 @@ void GPIO_configure(const GPIO_pin_t* gpio, GPIO_mode_t mode, GPIO_output_type_t
  */
 void GPIO_init(void) {
 	// Enable IOCON and all GPIOx clocks.
-	SYSCON -> AHBCLKCTRLSET[0] |= (0b111 << 13) ;
+	SYSCON_enable_peripheral(SYSCON_PERIPHERAL_GPIO0);
+	SYSCON_enable_peripheral(SYSCON_PERIPHERAL_GPIO1);
+	SYSCON_enable_peripheral(SYSCON_PERIPHERAL_GPIO2);
+	// Reset GPIO blocks.
+	SYSCON_reset_peripheral(SYSCON_PERIPHERAL_GPIO0);
+	SYSCON_reset_peripheral(SYSCON_PERIPHERAL_GPIO1);
+	SYSCON_reset_peripheral(SYSCON_PERIPHERAL_GPIO2);
 	// Programming pins.
 #ifndef DEBUG
 	GPIO_configure(&GPIO_SWDIO, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_STANDARD, GPIO_PULL_NONE);
