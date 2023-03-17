@@ -33,7 +33,7 @@
 #define SYSCON_SELI_M_THRESHOLD_1				8000
 #define SYSCON_SELI_M_THRESHOLD_2				122
 
-#define SYSCON_NUMBER_OF_WAIT_STATES_THRESHOLDS	12
+#define SYSCON_WAIT_STATES_MAX					12
 
 #define SYSCON_CLKOUT_DIVIDER_MAX				255
 
@@ -71,7 +71,7 @@ static const SYSCON_peripheral_bit_t SYSCON_PERIPHERAL_CLOCK_BIT[SYSCON_PERIPHER
 	{1, 0}, {1, 1}, {1, 2}, {1, 10}, {1, 11}, {1, 12}, {1, 13}, {1, 14}, {1, 15}, {1, 16}, {1, 17}, {1, 18}, {1, 22}, {1, 25}, {1, 26}, {1, 27},
 	{2, 1}, {2, 2}, {2, 3}, {2, 4}, {2, 5}, {2, 6}, {2, 7}, {2, 8}, {2, 13}, {2, 15}, {2, 16}, {2, 17}, {2, 18}, {2, 19}, {2, 20}, {2, 21}, {2, 22}, {2, 23}, {2, 24}, {2, 27}, {2, 28}, {2, 29}, {2, 30}
 };
-static const uint32_t SYSCON_WAIT_STATES_THRESHOLDS[SYSCON_NUMBER_OF_WAIT_STATES_THRESHOLDS] = {
+static const uint32_t SYSCON_WAIT_STATES_THRESHOLDS[SYSCON_WAIT_STATES_MAX] = {
 	11000000, 22000000, 33000000, 44000000, 55000000, 66000000, 77000000, 88000000, 100000000, 115000000, 130000000, 150000000
 };
 static SYSCON_context_t syscon_ctx;
@@ -170,7 +170,7 @@ uint8_t _SYSCON_compute_latency(uint32_t system_clock_frequency_hz) {
 	// Local variables.
 	uint8_t wait_states = 0;
 	// Compute number of wait states.
-	for (wait_states=0 ; wait_states<SYSCON_NUMBER_OF_WAIT_STATES_THRESHOLDS ; wait_states++) {
+	for (wait_states=0 ; wait_states<SYSCON_WAIT_STATES_MAX ; wait_states++) {
 		if (system_clock_frequency_hz <= SYSCON_WAIT_STATES_THRESHOLDS[wait_states]) {
 			break;
 		}
@@ -221,6 +221,7 @@ errors:
 SYSCON_status_t _SYSCON_switch_system_clock(SYSCON_main_clock_a_source_t source_a, SYSCON_main_clock_b_source_t source_b, uint32_t system_clock_frequency_hz) {
 	// Local variables.
 	SYSCON_status_t status = SYSCON_SUCCESS;
+	PMC_status_t pmc_status = PMC_SUCCESS;
 	uint8_t current_latency = 0;
 	uint8_t new_latency = 0;
 	// Check parameters.
@@ -237,6 +238,9 @@ SYSCON_status_t _SYSCON_switch_system_clock(SYSCON_main_clock_a_source_t source_
 		status = SYSCON_ERROR_SYSTEM_FREQUENCY_OVERFLOW;
 		goto errors;
 	}
+	// Update DC-DC.
+	pmc_status = PMC_configure_dc_dc(system_clock_frequency_hz);
+	PMC_status_check(SYSCON_ERROR_BASE_PMC);
 	// Computes latencies.
 	current_latency = _SYSCON_get_latency();
 	new_latency = _SYSCON_compute_latency(system_clock_frequency_hz);

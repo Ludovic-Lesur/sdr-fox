@@ -16,6 +16,7 @@ typedef enum {
 	PMC_SUCCESS = 0,
 	PMC_ERROR_BLOCK,
 	PMC_ERROR_32K_OSC_SOURCE,
+	PMC_ERROR_DCDC_POWER_PROFILE,
 	PMC_ERROR_BASE_LAST = 0x0100
 } PMC_status_t;
 
@@ -45,6 +46,8 @@ typedef enum {
 } PMC_32k_osc_source_t;
 
 /*** PMC functions ***/
+
+PMC_status_t PMC_configure_dc_dc(uint32_t system_clock_frequency_hz);
 
 PMC_status_t PMC_power_on(PMC_block_t block);
 PMC_status_t PMC_power_off(PMC_block_t block);

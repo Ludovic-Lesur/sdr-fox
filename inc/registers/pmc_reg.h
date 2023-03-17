@@ -50,6 +50,11 @@ typedef struct {
 	volatile uint32_t SRAMCTRL;		// All SRAMs common control signals [Reset by: PoR, Pin Reset, Brown Out Detectors Reset, Software Reset], offset: 0xD4.
 } PMC_registers_t;
 
+/*** PMC registers default value ***/
+
+const uint32_t PMC_DCDC0_DEFAULT = 0x010C4E68;
+const uint32_t PMC_DCDC1_DEFAULT = 0x01803A98;
+
 /*** PMC base address ***/
 
 #define PMC		((PMC_registers_t*) ((uint32_t) 0x40020000))
