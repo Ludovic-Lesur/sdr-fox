@@ -22,6 +22,8 @@ typedef enum {
 	SYSCON_SUCCESS = 0,
 	SYSCON_ERROR_MAIN_CLOCK_A_SOURCE,
 	SYSCON_ERROR_MAIN_CLOCK_B_SOURCE,
+	SYSCON_ERROR_CLKOUT_SOURCE,
+	SYSCON_ERROR_CLKOUT_DIVIDER,
 	SYSCON_ERROR_SYSTEM_FREQUENCY_OVERFLOW,
 	SYSCON_ERROR_32K_OSC_TIMEOUT,
 	SYSCON_ERROR_CLK_IN_TIMEOUT,
@@ -97,12 +99,25 @@ typedef enum {
 	SYSCON_PERIPHERAL_LAST
 } SYSCON_peripheral_t;
 
+typedef enum {
+	SYSCON_CLKOUT_SOURCE_MAIN = 0,
+	SYSCON_CLKOUT_SOURCE_PLL0,
+	SYSCON_CLKOUT_SOURCE_CLKIN,
+	SYSCON_CLKOUT_SOURCE_FRO96M,
+	SYSCON_CLKOUT_SOURCE_FRO1M,
+	SYSCON_CLKOUT_SOURCE_PLL1,
+	SYSCON_CLKOUT_SOURCE_32K_OSC,
+	SYSCON_CLKOUT_SOURCE_LAST
+} SYSCON_clkout_source_t;
+
 /*** SYSCON functions ***/
 
 SYSCON_status_t SYSCON_init_clock(void);
 
 SYSCON_status_t SYSCON_enable_peripheral(SYSCON_peripheral_t peripheral);
 SYSCON_status_t SYSCON_reset_peripheral(SYSCON_peripheral_t peripheral);
+
+SYSCON_status_t SYSCON_configure_clkout(SYSCON_clkout_source_t source, uint8_t divider);
 
 #define SYSCON_status_check(error_base) { if (syscon_status != SYSCON_SUCCESS) { status = error_base + syscon_status; goto errors; }}
 #define SYSCON_error_check() { ERROR_status_check(syscon_status, SYSCON_SUCCESS, ERROR_BASE_SYSCON); }

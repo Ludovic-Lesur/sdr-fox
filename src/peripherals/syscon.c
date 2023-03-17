@@ -35,6 +35,8 @@
 
 #define SYSCON_NUMBER_OF_WAIT_STATES_THRESHOLDS	12
 
+#define SYSCON_CLKOUT_DIVIDER_MAX				255
+
 /*** SYSCON local structures ***/
 
 typedef enum {
@@ -43,7 +45,7 @@ typedef enum {
 	SYSCON_MAIN_CLOCK_A_SOURCE_FRO1M,
 	SYSCON_MAIN_CLOCK_A_SOURCE_FRO96M,
 	SYSCON_MAIN_CLOCK_A_SOURCE_LAST
-} SYSCON_main_clock_a_source;
+} SYSCON_main_clock_a_source_t;
 
 typedef enum {
 	SYSCON_MAIN_CLOCK_B_SOURCE_MAIN_CLOCK_A = 0,
@@ -51,7 +53,7 @@ typedef enum {
 	SYSCON_MAIN_CLOCK_B_SOURCE_PLL1,
 	SYSCON_MAIN_CLOCK_B_SOURCE_32K_OSC,
 	SYSCON_MAIN_CLOCK_B_SOURCE_LAST
-} SYSCON_main_clock_b_source;
+} SYSCON_main_clock_b_source_t;
 
 typedef struct {
 	uint8_t ahb_register_index;
@@ -160,38 +162,67 @@ errors:
 	return status;
 }
 
-/* SET FLASH LATENCY ACCORDING TO CURRENT SYSTEM CLOCK.
- * @param:			None.
- * @return status:	Function execution status.
+/* RETURNS THE NUMBER OF WAIT STATES REQUIRED FOR A GIVEN SYSTEM CLOCK FREQUENCY.
+ * @param system_clock_frequency_hz:	Targetted system clock frequency in Hz.
+ * @return wait_states:					Number of wait states required.
  */
-SYSCON_status_t _SYSCON_update_latency(void) {
+uint8_t _SYSCON_compute_latency(uint32_t system_clock_frequency_hz) {
 	// Local variables.
-	SYSCON_status_t status = FLASH_SUCCESS;
-	FLASH_status_t flash_status = FLASH_SUCCESS;
 	uint8_t wait_states = 0;
 	// Compute number of wait states.
 	for (wait_states=0 ; wait_states<SYSCON_NUMBER_OF_WAIT_STATES_THRESHOLDS ; wait_states++) {
-		if (syscon_ctx.system_clock_hz <= SYSCON_WAIT_STATES_THRESHOLDS[wait_states]) {
+		if (system_clock_frequency_hz <= SYSCON_WAIT_STATES_THRESHOLDS[wait_states]) {
 			break;
 		}
 	}
+	return wait_states;
+}
+
+/* READ THE CURRENT NUMBER OF WAIT STATES.
+ * @param:				None.
+ * @return wait_states:	Current number of wait states.
+ */
+uint8_t _SYSCON_get_latency(void) {
+	// Local variables.
+	uint8_t wait_states = 0;
+	// Read register.
+	wait_states = ((SYSCON -> FMCCR) >> 12) & 0x0F;
+	// Return.
+	return wait_states;
+}
+
+/* SET FLASH LATENCY.
+ * @param wait_states:	Number of wait states to set.
+ * @return status:		Function execution status.
+ */
+SYSCON_status_t _SYSCON_set_latency(uint8_t wait_states) {
+	// Local variables.
+	SYSCON_status_t status = FLASH_SUCCESS;
+	FLASH_status_t flash_status = FLASH_SUCCESS;
+	uint32_t fmccr_reg_value = 0;
 	// Set flash latency.
 	flash_status = FLASH_set_latency(wait_states);
 	FLASH_status_check(SYSCON_ERROR_BASE_FLASH);
-	SYSCON -> FMCCR &= ~(0b1111 << 12);
-	SYSCON -> FMCCR |= ((wait_states & 0b1111) << 12);
+	// Set local latency.
+	fmccr_reg_value = (SYSCON -> FMCCR);
+	fmccr_reg_value &= ~(0b1111 << 12);
+	fmccr_reg_value |= ((wait_states & 0b1111) << 12);
+	SYSCON -> FMCCR = fmccr_reg_value;
 errors:
 	return status;
 }
 
 /* SWITCH SYSTEM CLOCK.
- * @param source_a:	Main clock A source.
- * @param source_b:	Main clock B source.
- * @return status:	Function execution status.
+ * @param source_a:						Main clock A source.
+ * @param source_b:						Main clock B source.
+ * @param system_clock_frequency_hz:	Targetted system clock frequency in Hz.
+ * @return status:						Function execution status.
  */
-SYSCON_status_t _SYSCON_switch_system_clock(SYSCON_main_clock_a_source source_a, SYSCON_main_clock_b_source source_b) {
+SYSCON_status_t _SYSCON_switch_system_clock(SYSCON_main_clock_a_source_t source_a, SYSCON_main_clock_b_source_t source_b, uint32_t system_clock_frequency_hz) {
 	// Local variables.
 	SYSCON_status_t status = SYSCON_SUCCESS;
+	uint8_t current_latency = 0;
+	uint8_t new_latency = 0;
 	// Check parameters.
 	if (source_a >= SYSCON_MAIN_CLOCK_A_SOURCE_LAST) {
 		status = SYSCON_ERROR_MAIN_CLOCK_A_SOURCE;
@@ -202,16 +233,28 @@ SYSCON_status_t _SYSCON_switch_system_clock(SYSCON_main_clock_a_source source_a,
 		goto errors;
 	}
 	// Check targetted frequency.
-	if (syscon_ctx.system_clock_hz > SYSCON_SYSTEM_CLOCK_FREQUENCY_HZ_MAX) {
+	if (system_clock_frequency_hz > SYSCON_SYSTEM_CLOCK_FREQUENCY_HZ_MAX) {
 		status = SYSCON_ERROR_SYSTEM_FREQUENCY_OVERFLOW;
 		goto errors;
 	}
-	// Set latency.
-	status = _SYSCON_update_latency();
-	if (status != SYSCON_SUCCESS) goto errors;
+	// Computes latencies.
+	current_latency = _SYSCON_get_latency();
+	new_latency = _SYSCON_compute_latency(system_clock_frequency_hz);
+	// Set latency before switching if it has to be increased.
+	if (new_latency > current_latency) {
+		status = _SYSCON_set_latency(new_latency);
+		if (status != SYSCON_SUCCESS) goto errors;
+	}
 	// Switch clock.
 	SYSCON -> MAINCLKSELA = source_a;
 	SYSCON -> MAINCLKSELB = source_b;
+	// Set latency after switching if it has to be reduced.
+	if (new_latency < current_latency) {
+		status = _SYSCON_set_latency(new_latency);
+		if (status != SYSCON_SUCCESS) goto errors;
+	}
+	// Update context.
+	syscon_ctx.system_clock_hz = system_clock_frequency_hz;
 errors:
 	return status;
 }
@@ -228,7 +271,7 @@ SYSCON_status_t _SYSCON_switch_to_pll1(void) {
 	uint32_t selp = 0;
 	uint32_t seli = 0;
 	uint32_t loop_count = 0;
-	uint64_t sysclk_hz = 0;
+	uint64_t pll_frequency_hz = 0;
 	// Compute bandwidth values.
 	selp = ((SYSCON_PLL1_M / 4) + 1);
 	if (selp > SYSCON_SELP_MAX_VALUE) {
@@ -274,12 +317,11 @@ SYSCON_status_t _SYSCON_switch_to_pll1(void) {
 			goto errors;
 		}
 	}
-	// Update system clock value.
-	sysclk_hz = ((uint64_t) SYSCON_PLL1_M) * ((uint64_t) SYSCON_XTAL32M_FREQUENCY_HZ);
-	sysclk_hz /= (uint64_t) SYSCON_PLL1_N;
-	syscon_ctx.system_clock_hz = (uint32_t) sysclk_hz;
+	// Compute PLL frequency.
+	pll_frequency_hz = ((uint64_t) SYSCON_PLL1_M) * ((uint64_t) SYSCON_XTAL32M_FREQUENCY_HZ);
+	pll_frequency_hz /= (uint64_t) SYSCON_PLL1_N;
 	// Switch to PLL.
-	status = _SYSCON_switch_system_clock(SYSCON_MAIN_CLOCK_A_SOURCE_CLKIN, SYSCON_MAIN_CLOCK_B_SOURCE_PLL1);
+	status = _SYSCON_switch_system_clock(SYSCON_MAIN_CLOCK_A_SOURCE_CLKIN, SYSCON_MAIN_CLOCK_B_SOURCE_PLL1, (uint32_t) pll_frequency_hz);
 errors:
 	return status;
 }
@@ -293,25 +335,22 @@ errors:
 SYSCON_status_t SYSCON_init_clock(void) {
 	// Local variables.
 	SYSCON_status_t status = SYSCON_SUCCESS;
-	// Init context.
-	syscon_ctx.system_clock_hz = SYSCON_FRO12M_FREQUENCY_HZ;
-	// Enable analog control block.
+	// Enable FLASH and ANACTRL blocks.
+	status = SYSCON_enable_peripheral(SYSCON_PERIPHERAL_FLASH);
+	if (status != SYSCON_SUCCESS) goto errors;
 	status = SYSCON_enable_peripheral(SYSCON_PERIPHERAL_ANACTRL);
 	if (status != SYSCON_SUCCESS) goto errors;
 	// Switch on internal clock by default.
 	status = _SYSCON_enable_fro();
 	if (status != SYSCON_SUCCESS) goto errors;
-	status = _SYSCON_switch_system_clock(SYSCON_MAIN_CLOCK_A_SOURCE_FRO12M, SYSCON_MAIN_CLOCK_B_SOURCE_MAIN_CLOCK_A);
-	if (status != SYSCON_SUCCESS) goto errors;
-	// Output (main clock / 100) on CLKOUT pin.
-	SYSCON -> CLKOUTDIV = 0x64;
-	SYSCON -> CLKOUTSEL = 0x00;
-	GPIO_configure(&GPIO_CLKOUT, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_FAST, GPIO_PULL_NONE);
 	// Enable low speed crystal.
 	status = _SYSCON_enable_32k_osc();
 	if (status != SYSCON_SUCCESS) goto errors;
 	// Enable high speed crystal.
 	status = _SYSCON_enable_clk_in();
+	if (status != SYSCON_SUCCESS) goto errors;
+	// Switch to FR012M by default.
+	status = _SYSCON_switch_system_clock(SYSCON_MAIN_CLOCK_A_SOURCE_FRO12M, SYSCON_MAIN_CLOCK_B_SOURCE_MAIN_CLOCK_A, SYSCON_FRO12M_FREQUENCY_HZ);
 	if (status != SYSCON_SUCCESS) goto errors;
 	// Switch to PLL1.
 	status = _SYSCON_switch_to_pll1();
@@ -351,6 +390,33 @@ SYSCON_status_t SYSCON_reset_peripheral(SYSCON_peripheral_t peripheral) {
 	// Reset peripheral.
 	SYSCON -> PRESETCTRLSET[SYSCON_PERIPHERAL_CLOCK_BIT[peripheral].ahb_register_index] = (0b1 << SYSCON_PERIPHERAL_CLOCK_BIT[peripheral].bit_index);
 	SYSCON -> PRESETCTRLCLR[SYSCON_PERIPHERAL_CLOCK_BIT[peripheral].ahb_register_index] = (0b1 << SYSCON_PERIPHERAL_CLOCK_BIT[peripheral].bit_index);
+errors:
+	return status;
+}
+
+/* CONFIGURE CLOCK OUTPUT PIN.
+ * @param source: 	Clock to output.
+ * @param divider:	Divider to apply.
+ * @return status:	Function execution status.
+ */
+SYSCON_status_t SYSCON_configure_clkout(SYSCON_clkout_source_t source, uint8_t divider) {
+	// Local variables.
+	SYSCON_status_t status = SYSCON_SUCCESS;
+	// Check parameters.
+	if (source >= SYSCON_CLKOUT_SOURCE_LAST) {
+		status = SYSCON_ERROR_CLKOUT_SOURCE;
+		goto errors;
+	}
+	if (divider > SYSCON_CLKOUT_DIVIDER_MAX) {
+		status = SYSCON_ERROR_CLKOUT_DIVIDER;
+		goto errors;
+	}
+	// Output (main clock / 100) on CLKOUT pin.
+	SYSCON -> CLKOUTDIV &= 0x80000000;
+	SYSCON -> CLKOUTDIV |= (divider & 0xFF);
+	SYSCON -> CLKOUTSEL = source;
+	// Enable GPIO.
+	GPIO_configure(&GPIO_CLKOUT, GPIO_MODE_DIGITAL_OUTPUT, GPIO_TYPE_PUSH_PULL, GPIO_SLEW_RATE_FAST, GPIO_PULL_NONE);
 errors:
 	return status;
 }

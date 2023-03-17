@@ -25,6 +25,7 @@ int main(void) {
 	NVIC_init();
 	// Init peripherals.
 	GPIO_init();
+	SYSCON_configure_clkout(SYSCON_CLKOUT_SOURCE_MAIN, 100);
 	// Init clock.
 	syscon_status = SYSCON_init_clock();
 	SYSCON_error_check();
