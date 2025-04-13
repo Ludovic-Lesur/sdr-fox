@@ -23,6 +23,7 @@
 /*** USB HS DEVICE local macros ***/
 
 #define USB_HS_DEVICE_ADDRESS_MAX                               0x7F
+#define USB_HS_DEVICE_ADDRESS_MASK                              USB_HS_DEVICE_ADDRESS_MAX
 
 #define USB_HS_DEVICE_DISCONNECT_DELAY_US                       10000
 
@@ -457,24 +458,6 @@ errors:
     return status;
 }
 
-/*******************************************************************/
-static USB_HS_DEVICE_status_t _USB_HS_DEVICE_set_address(uint8_t device_address) {
-    // Local variables.
-    USB_HS_DEVICE_status_t status = USB_HS_DEVICE_SUCCESS;
-    uint32_t reg_value = 0;
-    // Check address.
-    if (device_address > USB_HS_DEVICE_ADDRESS_MAX) {
-        status = USB_HS_DEVICE_ERROR_ADDRESS;
-        goto errors;
-    }
-    // Set device address.
-    reg_value = ((USB_HS_DEVICE->DEVCMDSTAT) & 0xFFFFFFE0);
-    reg_value |= (device_address & 0x7F);
-    USB_HS_DEVICE->DEVCMDSTAT = reg_value;
-errors:
-    return status;
-}
-
 /*** USB HS DEVICE functions ***/
 
 /*******************************************************************/
@@ -522,7 +505,7 @@ USB_HS_DEVICE_status_t USB_HS_DEVICE_init(uint8_t nvic_priority) {
     // Disable NAK interrupts.
     USB_HS_DEVICE->DEVCMDSTAT &= ~(0b1111 << 12);
     // Always start with address 0x00 for enumeration.
-    status = _USB_HS_DEVICE_set_address(0x00);
+    status = USB_HS_DEVICE_set_address(0x00);
     if (status != USB_HS_DEVICE_SUCCESS) goto errors;
     // Reset peripheral.
     status = USB_HS_DEVICE_reset();
@@ -717,6 +700,24 @@ USB_HS_DEVICE_status_t USB_HS_DEVICE_unregister_endpoint(USB_physical_endpoint_t
     if (status != USB_HS_DEVICE_SUCCESS) goto errors;
     // Reset endpoint.
     _USB_HS_DEVICE_reset_endpoint(ep_phy);
+errors:
+    return status;
+}
+
+/*******************************************************************/
+USB_HS_DEVICE_status_t USB_HS_DEVICE_set_address(uint8_t device_address) {
+    // Local variables.
+    USB_HS_DEVICE_status_t status = USB_HS_DEVICE_SUCCESS;
+    uint32_t reg_value = 0;
+    // Check address.
+    if (device_address > USB_HS_DEVICE_ADDRESS_MAX) {
+        status = USB_HS_DEVICE_ERROR_ADDRESS;
+        goto errors;
+    }
+    // Set device address.
+    reg_value = ((USB_HS_DEVICE->DEVCMDSTAT) & (~USB_HS_DEVICE_ADDRESS_MASK));
+    reg_value |= (device_address & USB_HS_DEVICE_ADDRESS_MASK);
+    USB_HS_DEVICE->DEVCMDSTAT = reg_value;
 errors:
     return status;
 }

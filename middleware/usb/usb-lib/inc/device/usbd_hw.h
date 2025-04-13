@@ -59,6 +59,15 @@ USBD_status_t USBD_HW_register_endpoint(USB_physical_endpoint_t* endpoint);
 USBD_status_t USBD_HW_unregister_endpoint(USB_physical_endpoint_t* endpoint);
 
 /*!******************************************************************
+ * \fn USBD_status_t USBD_HW_set_address(uint8_t device_address)
+ * \brief Set USB device address.
+ * \param[in]   device_address: Address to set.
+ * \param[out]  none
+ * \retval      Function execution status.
+ *******************************************************************/
+USBD_status_t USBD_HW_set_address(uint8_t device_address);
+
+/*!******************************************************************
  * \fn USBD_status_t USBD_HW_start(void)
  * \brief Start USB peripheral.
  * \param[in]   none

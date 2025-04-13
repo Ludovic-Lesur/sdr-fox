@@ -76,6 +76,18 @@ errors:
 }
 
 /*******************************************************************/
+USBD_status_t USBD_HW_set_address(uint8_t device_address) {
+    // Local variables.
+    USBD_status_t status = USBD_SUCCESS;
+    USB_HS_DEVICE_status_t usb_hs_device_status = USB_HS_DEVICE_SUCCESS;
+    // Unregister end-point.
+    usb_hs_device_status = USB_HS_DEVICE_set_address(device_address);
+    USB_HS_DEVICE_exit_error(USBD_ERROR_BASE_HW_INTERFACE);
+errors:
+    return status;
+}
+
+/*******************************************************************/
 USBD_status_t USBD_HW_start(void) {
     // Local variables.
     USBD_status_t status = USBD_SUCCESS;

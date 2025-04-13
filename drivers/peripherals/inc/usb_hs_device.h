@@ -107,6 +107,15 @@ USB_HS_DEVICE_status_t USB_HS_DEVICE_register_endpoint(USB_physical_endpoint_t* 
 USB_HS_DEVICE_status_t USB_HS_DEVICE_unregister_endpoint(USB_physical_endpoint_t* endpoint);
 
 /*!******************************************************************
+ * \fn USB_HS_DEVICE_status_t USB_HS_DEVICE_set_address(uint8_t device_address)
+ * \brief Set USB device address.
+ * \param[in]   device_address: Address to set.
+ * \param[out]  none
+ * \retval      Function execution status.
+ *******************************************************************/
+USB_HS_DEVICE_status_t USB_HS_DEVICE_set_address(uint8_t device_address);
+
+/*!******************************************************************
  * \fn USB_HS_DEVICE_status_t USB_HS_DEVICE_start(void)
  * \brief Start high speed USB device driver.
  * \param[in]   none

@@ -152,9 +152,10 @@ const USB_interface_t USBD_CONTROL_INTERFACE = {
 static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* usb_data_out, USB_request_operation_t* request_operation, USB_data_t* usb_data_in) {
     // Local variables.
     USBD_CONTROL_status_t status = USBD_CONTROL_SUCCESS;
+    USBD_status_t usbd_status = USBD_SUCCESS;
     USB_request_t* request_packet;
     // Check parameters.
-    if ((usb_data_out == NULL) || (request_operation == NULL)) {
+    if ((usb_data_out == NULL) || (request_operation == NULL) || ((usb_data_in == NULL))) {
         status = USBD_CONTROL_ERROR_NULL_PARAMETER;
         goto errors;
     }
@@ -165,6 +166,9 @@ static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* u
     }
     // Reset setup request operation.
     (*request_operation) = USB_REQUEST_OPERATION_NOT_SUPPORTED;
+    // Reset output data.
+    usb_data_in->data = NULL;
+    usb_data_in->data_size_bytes = 0;
     // Cast frame.
     request_packet = (USB_request_t*) (usb_data_out->data);
     // Compute transfer type.
@@ -185,6 +189,10 @@ static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* u
         // Read descriptor.
         status = usbd_control_ctx.data_callbacks->get_descriptor((request_packet->wValue).descriptor_type, &(usb_data_in->data), &(usb_data_in->data_size_bytes));
         if (status != USBD_CONTROL_SUCCESS) goto errors;
+        break;
+    case USB_REQUEST_ID_SET_ADDRESS:
+        usbd_status = USBD_HW_set_address((uint8_t) ((request_packet->wValue).value));
+        USBD_exit_error(USBD_CONTROL_ERROR_BASE_HW_INTERFACE);
         break;
     default:
         // Unsupported request.
