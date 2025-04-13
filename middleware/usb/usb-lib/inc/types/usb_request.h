@@ -82,10 +82,10 @@ typedef enum {
  *******************************************************************/
 typedef union {
     struct {
-        unsigned recipient :5;
-        unsigned type :2;
-        unsigned direction :1;
-    } __attribute__((scalar_storage_order("little-endian")))__attribute__((packed));
+        uint8_t recipient :5;
+        uint8_t type :2;
+        uint8_t direction :1;
+    } __attribute__((packed));
     uint8_t value;
 } USB_request_type_t;
 
@@ -97,7 +97,7 @@ typedef union {
     struct {
         uint8_t descriptor_index;
         uint8_t descriptor_type;
-    } __attribute__((scalar_storage_order("little-endian")))__attribute__((packed));
+    } __attribute__((packed));
     uint16_t value;
 } USB_request_value_t;
 
@@ -111,6 +111,6 @@ typedef struct {
     USB_request_value_t wValue;
     uint16_t wIndex;
     uint16_t wLength;
-} USB_request_t __attribute__((scalar_storage_order("little-endian")));
+} __attribute__((packed)) USB_request_t;
 
 #endif /* __USB_REQUEST_H__ */

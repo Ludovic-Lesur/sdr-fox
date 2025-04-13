@@ -14,7 +14,6 @@
 #include "syscon.h"
 #include "systick.h"
 #include "types.h"
-#include "usb_device_configuration.h"
 #include "usb.h"
 
 /*** MAIN functions ***/

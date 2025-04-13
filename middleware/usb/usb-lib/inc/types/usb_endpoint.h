@@ -101,10 +101,10 @@ typedef enum {
  *******************************************************************/
 typedef union {
     struct {
-        unsigned number :4;
-        unsigned reserved_6_4 :3;
-        unsigned direction :1;
-    } __attribute__((scalar_storage_order("little-endian")))__attribute__((packed));
+        uint8_t number :4;
+        uint8_t reserved_6_4 :3;
+        uint8_t direction :1;
+    } __attribute__((packed));
     uint8_t value;
 } USB_endpoint_address_descriptor_t;
 
@@ -114,11 +114,11 @@ typedef union {
  *******************************************************************/
 typedef union {
     struct {
-        unsigned transfer_type :2;
-        unsigned synchronization_type :2;
-        unsigned usage_type :2;
-        unsigned reserved_7_6 :2;
-    } __attribute__((scalar_storage_order("little-endian")))__attribute__((packed));
+        uint8_t transfer_type :2;
+        uint8_t synchronization_type :2;
+        uint8_t usage_type :2;
+        uint8_t reserved_7_6 :2;
+    } __attribute__((packed));
     uint8_t value;
 } USB_endpoint_attributes_descriptor_t;
 
@@ -128,10 +128,10 @@ typedef union {
  *******************************************************************/
 typedef union {
     struct {
-        unsigned max_packet_size :11;
-        unsigned transaction_per_microframe :2;
-        unsigned reserved_15_13 :3;
-    } __attribute__((scalar_storage_order("little-endian")))__attribute__((packed));
+        uint16_t max_packet_size :11;
+        uint8_t transaction_per_microframe :2;
+        uint8_t reserved_15_13 :3;
+    } __attribute__((packed));
     uint16_t value;
 } USB_endpoint_max_packet_size_descriptor_t;
 
@@ -146,7 +146,7 @@ typedef struct {
     USB_endpoint_attributes_descriptor_t bmAttributes;
     USB_endpoint_max_packet_size_descriptor_t wMaxPacketSize;
     uint8_t bInterval;
-} USB_endpoint_descriptor_t;
+} __attribute__((packed)) USB_endpoint_descriptor_t;
 
 /*!******************************************************************
  * \struct USB_physical_endpoint_t

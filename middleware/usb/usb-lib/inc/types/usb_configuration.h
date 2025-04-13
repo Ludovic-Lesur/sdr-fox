@@ -19,11 +19,11 @@
  *******************************************************************/
 typedef union {
     struct {
-        unsigned reserved_4_0 :5;
-        unsigned remote_wakeup :1;
-        unsigned self_powered :1;
-        unsigned reserved_7 :1;
-    } __attribute__((scalar_storage_order("little-endian")))__attribute__((packed));
+        uint8_t reserved_4_0 :5;
+        uint8_t remote_wakeup :1;
+        uint8_t self_powered :1;
+        uint8_t reserved_7 :1;
+    } __attribute__((packed));
     uint8_t value;
 } USB_configuration_descriptor_attributes_t;
 
@@ -40,7 +40,7 @@ typedef struct {
     uint8_t iConfiguration;
     USB_configuration_descriptor_attributes_t bmAttributes;
     uint8_t bMaxPower;
-} USB_configuration_descriptor_t;
+} __attribute__((packed)) USB_configuration_descriptor_t;
 
 /*!******************************************************************
  * \struct USB_configuration_t

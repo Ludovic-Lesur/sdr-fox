@@ -32,6 +32,6 @@ typedef struct {
     uint8_t bLength;
     USB_descriptor_type_t bDescriptorType;
     char_t* wLANGID;
-} USB_string_descriptor_t;
+} __attribute__((packed)) USB_string_descriptor_t;
 
 #endif /* __USB_DESCRIPTOR_H__ */

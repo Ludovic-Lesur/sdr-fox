@@ -28,7 +28,7 @@ typedef struct {
     uint8_t bInterfaceSubClass;
     uint8_t bInterfaceProtocol;
     uint8_t iInterface;
-} USB_interface_descriptor_t;
+} __attribute__((packed)) USB_interface_descriptor_t;
 
 /*!******************************************************************
  * \struct USB_interface_t

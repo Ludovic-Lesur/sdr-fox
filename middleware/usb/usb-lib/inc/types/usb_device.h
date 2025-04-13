@@ -15,7 +15,7 @@
 
 /*** USB DESCRIPTOR macros ***/
 
-#define USB_DESCRIPTOR_USB_VERSION      0x0210
+#define USB_DESCRIPTOR_USB_VERSION      0x0200
 #define USB_DESCRIPTOR_PROTOCOL_CUSTOM  0xFF
 
 /*** USB DEVICE structures ***/
@@ -39,7 +39,7 @@ typedef struct {
     uint8_t iProduct;
     uint8_t iSerialNumber;
     uint8_t bNumConfigurations;
-} USB_device_descriptor_t;
+} __attribute__((packed)) USB_device_descriptor_t;
 
 /*!******************************************************************
  * \struct USB_device_descriptor_t
@@ -55,6 +55,6 @@ typedef struct {
     uint8_t bMaxPacketSize0;
     uint8_t bNumConfigurations;
     uint8_t bReserved;
-} USB_device_qualifier_descriptor_t;
+} __attribute__((packed)) USB_device_qualifier_descriptor_t;
 
 #endif /* __USB_DEVICE_H__ */
