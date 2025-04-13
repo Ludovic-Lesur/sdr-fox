@@ -95,9 +95,9 @@ static const USB_endpoint_t USBD_CDC_EP_IN = {
     .descriptor = &USBD_CDC_PHY_EP_IN_DESCRIPTOR
 };
 
-static const USB_endpoint_t USBD_CDC_INTERFACE_EP_LIST[USBD_CDC_ENDPOINT_INDEX_LAST] = {
-    USBD_CDC_EP_OUT,
-    USBD_CDC_EP_IN
+static const USB_endpoint_t* const USBD_CDC_INTERFACE_EP_LIST[USBD_CDC_ENDPOINT_INDEX_LAST] = {
+    &USBD_CDC_EP_OUT,
+    &USBD_CDC_EP_IN
 };
 
 static const USB_interface_descriptor_t USB_DESCRIPTOR_INTERFACE_CDC = {
@@ -115,7 +115,7 @@ static const USB_interface_descriptor_t USB_DESCRIPTOR_INTERFACE_CDC = {
 
 const USB_interface_t USBD_CDC_INTERFACE = {
     .descriptor = &USB_DESCRIPTOR_INTERFACE_CDC,
-    .endpoint_list = (USB_endpoint_t*) USBD_CDC_INTERFACE_EP_LIST,
+    .endpoint_list = (const USB_endpoint_t**) &USBD_CDC_INTERFACE_EP_LIST,
     .number_of_endpoints = USBD_CDC_ENDPOINT_INDEX_LAST
 };
 
@@ -143,7 +143,7 @@ USBD_CDC_status_t USBD_CDC_init(void) {
     // Endpoints loop.
     for (idx = 0; idx < (USBD_CDC_INTERFACE.number_of_endpoints); idx++) {
         // Register endpoint.
-        usbd_status = USBD_HW_register_endpoint((USB_physical_endpoint_t*) ((USBD_CDC_INTERFACE.endpoint_list)[idx].physical_endpoint));
+        usbd_status = USBD_HW_register_endpoint((USB_physical_endpoint_t*) ((USBD_CDC_INTERFACE.endpoint_list)[idx]->physical_endpoint));
         USBD_exit_error(USBD_CDC_ERROR_BASE_HW_INTERFACE);
     }
 errors:
@@ -160,7 +160,7 @@ USBD_CDC_status_t USBD_CDC_de_init(void) {
     // Endpoints loop.
     for (idx = 0; idx < (USBD_CDC_INTERFACE.number_of_endpoints); idx++) {
         // Register endpoint.
-        usbd_status = USBD_HW_unregister_endpoint((USB_physical_endpoint_t*) ((USBD_CDC_INTERFACE.endpoint_list)[idx].physical_endpoint));
+        usbd_status = USBD_HW_unregister_endpoint((USB_physical_endpoint_t*) ((USBD_CDC_INTERFACE.endpoint_list)[idx]->physical_endpoint));
         USBD_exit_error(USBD_CDC_ERROR_BASE_HW_INTERFACE);
     }
 errors:

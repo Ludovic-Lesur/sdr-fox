@@ -47,10 +47,10 @@ typedef struct {
  * \brief USB configuration structure.
  *******************************************************************/
 typedef struct {
-    USB_configuration_descriptor_t* descriptor;
-    uint16_t max_power_ma;
+    const USB_configuration_descriptor_t* descriptor;
+    const USB_interface_t** interface_list;
     uint8_t number_of_interfaces;
-    USB_interface_t* interface_list;
+    uint16_t max_power_ma;
 } USB_configuration_t;
 
 #endif /* __USB_CONFIGURATION_H__ */

@@ -117,9 +117,9 @@ static const USB_endpoint_t USBD_CONTROL_EP_IN = {
     .physical_endpoint = &USBD_CONTROL_PHY_EP_IN
 };
 
-static const USB_endpoint_t USBD_CONTROL_EP_LIST[USBD_CONTROL_ENDPOINT_INDEX_LAST] = {
-    USBD_CONTROL_EP_OUT,
-    USBD_CONTROL_EP_IN
+static const USB_endpoint_t* const USBD_CONTROL_EP_LIST[USBD_CONTROL_ENDPOINT_INDEX_LAST] = {
+    &USBD_CONTROL_EP_OUT,
+    &USBD_CONTROL_EP_IN
 };
 
 static const USB_interface_descriptor_t USBD_CONTROL_INTERFACE_DESCRIPTOR = {
@@ -143,7 +143,7 @@ static USBD_CONTROL_context_t usbd_control_ctx = {
 const USB_interface_t USBD_CONTROL_INTERFACE = {
     .descriptor = &USBD_CONTROL_INTERFACE_DESCRIPTOR,
     .number_of_endpoints = USBD_CONTROL_ENDPOINT_INDEX_LAST,
-    .endpoint_list = (USB_endpoint_t*) &USBD_CONTROL_EP_LIST
+    .endpoint_list = (const USB_endpoint_t**) &USBD_CONTROL_EP_LIST
 };
 
 /*** USBD CONTROL local functions ***/
@@ -259,7 +259,7 @@ USBD_CONTROL_status_t USBD_CONTROL_init(USBD_CONTROL_data_callbacks_t* data_call
     usbd_control_ctx.data_callbacks = data_callbacks;
     // Register endpoints.
     for (idx = 0; idx < (USBD_CONTROL_INTERFACE.number_of_endpoints); idx++) {
-        usbd_status = USBD_HW_register_endpoint((USB_physical_endpoint_t*) ((USBD_CONTROL_INTERFACE.endpoint_list)[idx].physical_endpoint));
+        usbd_status = USBD_HW_register_endpoint((USB_physical_endpoint_t*) ((USBD_CONTROL_INTERFACE.endpoint_list)[idx]->physical_endpoint));
         USBD_exit_error(USBD_CONTROL_ERROR_BASE_HW_INTERFACE);
     }
     // Register setup callback.
@@ -287,7 +287,7 @@ USBD_CONTROL_status_t USBD_CONTROL_de_init(void) {
     usbd_control_ctx.data_callbacks = NULL;
     // Unregister endpoints.
     for (idx = 0; idx < (USBD_CONTROL_INTERFACE.number_of_endpoints); idx++) {
-        usbd_status = USBD_HW_unregister_endpoint((USB_physical_endpoint_t*) ((USBD_CONTROL_INTERFACE.endpoint_list)[idx].physical_endpoint));
+        usbd_status = USBD_HW_unregister_endpoint((USB_physical_endpoint_t*) ((USBD_CONTROL_INTERFACE.endpoint_list)[idx]->physical_endpoint));
         USBD_exit_error(USBD_CONTROL_ERROR_BASE_HW_INTERFACE);
     }
     // Update initialization flag.

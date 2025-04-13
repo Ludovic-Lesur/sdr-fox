@@ -54,7 +54,7 @@ typedef enum {
 
 /*** USB CONFIGURATION global variables ***/
 
-extern const USB_interface_t* USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_INTERFACE_INDEX_LAST];
+extern const USB_interface_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_INTERFACE_INDEX_LAST];
 
 extern const USB_configuration_t USB_CONFIGURATION;
 
