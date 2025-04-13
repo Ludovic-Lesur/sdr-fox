@@ -1,0 +1,3 @@
+[submodule "embedded-utils"]
+    path = drivers/utils/embedded-utils
+    url = https://github.com/Ludovic-Lesur/embedded-utils.git
