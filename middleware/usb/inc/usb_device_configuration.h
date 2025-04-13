@@ -38,20 +38,6 @@ typedef enum {
     USB_INTERFACE_INDEX_LAST
 } USB_interface_index_t;
 
-/*!******************************************************************
- * \enum USB_string_descriptor_index_t
- * \brief USB string descriptors index.
- *******************************************************************/
-typedef enum {
-    USB_STRING_DESCRIPTOR_INDEX_MANUFACTURER = 0,
-    USB_STRING_DESCRIPTOR_INDEX_PRODUCT,
-    USB_STRING_DESCRIPTOR_INDEX_SERIAL_NUMBER,
-    USB_STRING_DESCRIPTOR_INDEX_CONFIGURATION,
-    USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CONTROL,
-    USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CDC,
-    USB_STRING_DESCRIPTOR_INDEX_LAST
-} USB_string_descriptor_index_t;
-
 /*** USB CONFIGURATION global variables ***/
 
 extern const USB_interface_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_INTERFACE_INDEX_LAST];

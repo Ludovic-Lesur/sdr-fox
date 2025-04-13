@@ -12,6 +12,7 @@
 #include "device/standard/usbd_control.h"
 #include "device/class/usbd_cdc.h"
 #include "error.h"
+#include "strings.h"
 #include "types.h"
 #include "types/usb_types.h"
 
@@ -21,7 +22,8 @@ typedef enum {
     // Driver errors.
     USB_SUCCESS = 0,
     // Low level drivers errors.
-    USB_ERROR_BASE_USBD = ERROR_BASE_STEP,
+    USB_ERROR_BASE_STRING = ERROR_BASE_STEP,
+    USB_ERROR_BASE_USBD = (USB_ERROR_BASE_STRING + STRING_ERROR_BASE_LAST),
     USB_ERROR_BASE_USBD_CONTROL = (USB_ERROR_BASE_USBD + USBD_ERROR_BASE_LAST),
     USB_ERROR_BASE_USBD_CDC = (USB_ERROR_BASE_USBD_CONTROL + USBD_CONTROL_ERROR_BASE_LAST),
     // Last base value.

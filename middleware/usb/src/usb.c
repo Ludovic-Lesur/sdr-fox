@@ -11,6 +11,7 @@
 #include "device/standard/usbd_control.h"
 #include "device/usbd.h"
 #include "error.h"
+#include "strings.h"
 #include "types.h"
 #include "types/usb_types.h"
 #include "usb_device_configuration.h"
@@ -24,16 +25,19 @@
 #define USB_FULL_CONFIGURATION_DESCRIPTOR_SIZE_BYTES                1024
 #define USB_FULL_CONFIGURATION_DESCRIPTOR_TOTAL_LENGTH_FIELD_INDEX  2
 
+#define USB_STRING_DESCRIPTOR_SIZE_BYTES                            256
+
 /*** USB local structures ***/
 
 /*******************************************************************/
 typedef struct {
     uint8_t full_configuration_descriptor[USB_FULL_CONFIGURATION_DESCRIPTOR_SIZE_BYTES];
+    uint8_t string_descriptor[USB_STRING_DESCRIPTOR_SIZE_BYTES];
 } USB_context_t;
 
 /*** USB local functions declaration ***/
 
-static USBD_CONTROL_status_t _USB_get_descriptor(USB_descriptor_type_t type, uint8_t** descriptor_ptr, uint32_t* descriptor_size_bytes);
+static USBD_CONTROL_status_t _USB_get_descriptor(USB_descriptor_type_t type, uint8_t index, uint8_t** descriptor_ptr, uint32_t* descriptor_size_bytes);
 
 /*** USB local global variables ***/
 
@@ -46,34 +50,48 @@ static USB_context_t usb_ctx;
 /*** USB local functions ***/
 
 /*******************************************************************/
-static USBD_CONTROL_status_t _USB_get_descriptor(USB_descriptor_type_t type, uint8_t** descriptor_ptr, uint32_t* descriptor_size_bytes) {
+static USBD_CONTROL_status_t _USB_get_descriptor(USB_descriptor_type_t type, uint8_t index, uint8_t** descriptor_ptr, uint32_t* descriptor_size_bytes) {
     // Local variables.
     USBD_CONTROL_status_t status = USBD_CONTROL_SUCCESS;
+    STRING_status_t string_status = STRING_SUCCESS;
+    uint32_t str_size = 0;
+    uint32_t full_idx = 0;
+    uint32_t idx = 0;
     // Reset output.
     (*descriptor_ptr) = NULL;
     (*descriptor_size_bytes) = 0;
     // Check type.
     switch (type) {
     case USB_DESCRIPTOR_TYPE_DEVICE:
-        (*descriptor_ptr) = (uint8_t*) &USB_DESCRIPTOR_DEVICE;
-        (*descriptor_size_bytes) = USB_DESCRIPTOR_DEVICE.bLength;
+        (*descriptor_ptr) = (uint8_t*) &USB_DEVICE_DESCRIPTOR;
+        (*descriptor_size_bytes) = USB_DEVICE_DESCRIPTOR.bLength;
         break;
     case USB_DESCRIPTOR_TYPE_DEVICE_QUALIFIER:
-        (*descriptor_ptr) = (uint8_t*) &USB_DESCRIPTOR_DEVICE_QUALIFIER;
-        (*descriptor_size_bytes) = USB_DESCRIPTOR_DEVICE_QUALIFIER.bLength;
+        (*descriptor_ptr) = (uint8_t*) &USB_DEVICE_QUALIFIER_DESCRIPTOR;
+        (*descriptor_size_bytes) = USB_DEVICE_QUALIFIER_DESCRIPTOR.bLength;
         break;
     case USB_DESCRIPTOR_TYPE_CONFIGURATION:
     case USB_DESCRIPTOR_TYPE_OTHER_SPEED_CONFIGURATION:
         (*descriptor_ptr) = (uint8_t*) &(usb_ctx.full_configuration_descriptor);
         (*descriptor_size_bytes) = usb_ctx.full_configuration_descriptor[USB_FULL_CONFIGURATION_DESCRIPTOR_TOTAL_LENGTH_FIELD_INDEX];
         break;
-    case USB_DESCRIPTOR_TYPE_INTERFACE:
-        (*descriptor_ptr) = (uint8_t*) &(USB_CONFIGURATION.interface_list[0]->descriptor); // TODO dynamic index from request?
-        (*descriptor_size_bytes) = (USB_CONFIGURATION.interface_list[0]->descriptor)->bLength;
-        break;
-    case USB_DESCRIPTOR_TYPE_ENDPOINT:
-        (*descriptor_ptr) = (uint8_t*) &(USB_CONFIGURATION.interface_list[0]->endpoint_list[0]->descriptor); // TODO dynamic index from request?
-        (*descriptor_size_bytes) = (USB_CONFIGURATION.interface_list[0]->endpoint_list[0]->descriptor)->bLength;
+    case USB_DESCRIPTOR_TYPE_STRING:
+        // Get string length.
+        string_status = STRING_get_size((char_t*) USB_STRING_DESCRIPTOR[index], &str_size);
+        STRING_exit_error(USB_ERROR_BASE_STRING);
+        // Build string descriptor.
+        usb_ctx.string_descriptor[full_idx++] = (sizeof(USB_string_descriptor_t) + (str_size << ((index == USB_STRING_DESCRIPTOR_INDEX_LANGUAGE_ID) ? 0 : 1)));
+        usb_ctx.string_descriptor[full_idx++] = USB_DESCRIPTOR_TYPE_STRING;
+        // Append string.
+        for (idx = 0; idx < str_size; idx++) {
+            usb_ctx.string_descriptor[full_idx++] = USB_STRING_DESCRIPTOR[index][idx];
+            // Specific case of language ID.
+            if (index != USB_STRING_DESCRIPTOR_INDEX_LANGUAGE_ID) {
+                usb_ctx.string_descriptor[full_idx++] = 0x00;
+            }
+        }
+        (*descriptor_ptr) = (uint8_t*) &(usb_ctx.string_descriptor);
+        (*descriptor_size_bytes) = usb_ctx.string_descriptor[0];
         break;
     default:
         status = USBD_CONTROL_ERROR_DESCRIPTOR_TYPE;
@@ -99,8 +117,8 @@ USB_status_t USB_init(void) {
     uint32_t full_idx = 0;
     uint32_t idx = 0;
     // Build full configuration descriptor.
-    descriptor_ptr = (uint8_t*) &USB_DESCRIPTOR_CONFIGURATION;
-    for (idx = 0; idx < USB_DESCRIPTOR_CONFIGURATION.bLength; idx++) {
+    descriptor_ptr = (uint8_t*) &USB_CONFIGURATION_DESCRIPTOR;
+    for (idx = 0; idx < USB_CONFIGURATION_DESCRIPTOR.bLength; idx++) {
         usb_ctx.full_configuration_descriptor[full_idx++] = descriptor_ptr[idx];
     }
     // Interfaces loop.

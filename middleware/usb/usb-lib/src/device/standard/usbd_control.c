@@ -187,7 +187,7 @@ static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* u
     switch (request_packet->bRequest) {
     case USB_REQUEST_ID_GET_DESCRIPTOR:
         // Read descriptor.
-        status = usbd_control_ctx.data_callbacks->get_descriptor((request_packet->wValue).descriptor_type, &(usb_data_in->data), &(usb_data_in->data_size_bytes));
+        status = usbd_control_ctx.data_callbacks->get_descriptor((request_packet->wValue).descriptor_type, (request_packet->wValue).descriptor_index, &(usb_data_in->data), &(usb_data_in->data_size_bytes));
         if (status != USBD_CONTROL_SUCCESS) goto errors;
         // Clamp data size according to request.
         if ((usb_data_in->data_size_bytes) > (request_packet->wLength)) {

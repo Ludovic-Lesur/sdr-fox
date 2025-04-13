@@ -46,7 +46,7 @@ typedef enum {
  * \fn USB_control_get_descriptor_cb_t
  * \brief USBD CONTROL get descriptor request callback.
  *******************************************************************/
-typedef USBD_CONTROL_status_t (*USB_control_get_descriptor_cb_t)(USB_descriptor_type_t type, uint8_t** descriptor_ptr, uint32_t* descriptor_size_bytes);
+typedef USBD_CONTROL_status_t (*USB_control_get_descriptor_cb_t)(USB_descriptor_type_t type, uint8_t index, uint8_t** descriptor_ptr, uint32_t* descriptor_size_bytes);
 
 /*!******************************************************************
  * \enum USBD_CONTROL_data_callbacks_t
