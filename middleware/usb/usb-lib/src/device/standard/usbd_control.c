@@ -55,7 +55,7 @@ typedef struct {
 
 /*** USBD CONTROL local global variables ***/
 
-static const USB_physical_endpoint_t USBD_CONTROL_PHY_EP_OUT = {
+static const USB_physical_endpoint_t USBD_CONTROL_EP_PHY_OUT = {
     .number = USB_ENDPOINT_NUMBER_EP0,
     .direction = USB_ENDPOINT_DIRECTION_OUT,
     .transfer_type = USB_ENDPOINT_TRANSFER_TYPE_CONTROL,
@@ -65,7 +65,7 @@ static const USB_physical_endpoint_t USBD_CONTROL_PHY_EP_OUT = {
     .callback = &_USBD_CONTROL_endpoint_out_callback
 };
 
-static const USB_physical_endpoint_t USBD_CONTROL_PHY_EP_IN = {
+static const USB_physical_endpoint_t USBD_CONTROL_EP_PHY_IN = {
     .number = USB_ENDPOINT_NUMBER_EP0,
     .direction = USB_ENDPOINT_DIRECTION_IN,
     .transfer_type = USB_ENDPOINT_TRANSFER_TYPE_CONTROL,
@@ -75,46 +75,46 @@ static const USB_physical_endpoint_t USBD_CONTROL_PHY_EP_IN = {
     .callback = &_USBD_CONTROL_endpoint_in_callback
 };
 
-static const USB_endpoint_descriptor_t USBD_CONTROL_PHY_EP_OUT_DESCRIPTOR = {
+static const USB_endpoint_descriptor_t USBD_CONTROL_EP_PHY_OUT_DESCRIPTOR = {
     .bLength = sizeof(USB_endpoint_descriptor_t),
     .bDescriptorType = USB_DESCRIPTOR_TYPE_ENDPOINT,
-    .bEndpointAddress.number = USBD_CONTROL_PHY_EP_OUT.number,
-    .bEndpointAddress.direction = USBD_CONTROL_PHY_EP_OUT.direction,
+    .bEndpointAddress.number = USBD_CONTROL_EP_PHY_OUT.number,
+    .bEndpointAddress.direction = USBD_CONTROL_EP_PHY_OUT.direction,
     .bEndpointAddress.reserved_6_4 = 0,
-    .bmAttributes.transfer_type = USBD_CONTROL_PHY_EP_OUT.transfer_type,
-    .bmAttributes.synchronization_type = USBD_CONTROL_PHY_EP_OUT.synchronization_type,
-    .bmAttributes.usage_type = USBD_CONTROL_PHY_EP_OUT.usage_type,
+    .bmAttributes.transfer_type = USBD_CONTROL_EP_PHY_OUT.transfer_type,
+    .bmAttributes.synchronization_type = USBD_CONTROL_EP_PHY_OUT.synchronization_type,
+    .bmAttributes.usage_type = USBD_CONTROL_EP_PHY_OUT.usage_type,
     .bmAttributes.reserved_7_6 = 0,
-    .wMaxPacketSize.max_packet_size = USBD_CONTROL_PHY_EP_OUT.max_packet_size_bytes,
+    .wMaxPacketSize.max_packet_size = USBD_CONTROL_EP_PHY_OUT.max_packet_size_bytes,
     .wMaxPacketSize.transaction_per_microframe = 0,
     .wMaxPacketSize.reserved_15_13 = 0,
     .bInterval = 1
 };
 
-static const USB_endpoint_descriptor_t USBD_CONTROL_PHY_EP_IN_DESCRIPTOR = {
+static const USB_endpoint_descriptor_t USBD_CONTROL_EP_PHY_IN_DESCRIPTOR = {
     .bLength = sizeof(USB_endpoint_descriptor_t),
     .bDescriptorType = USB_DESCRIPTOR_TYPE_ENDPOINT,
-    .bEndpointAddress.number = USBD_CONTROL_PHY_EP_IN.number,
-    .bEndpointAddress.direction = USBD_CONTROL_PHY_EP_IN.direction,
+    .bEndpointAddress.number = USBD_CONTROL_EP_PHY_IN.number,
+    .bEndpointAddress.direction = USBD_CONTROL_EP_PHY_IN.direction,
     .bEndpointAddress.reserved_6_4 = 0,
-    .bmAttributes.transfer_type = USBD_CONTROL_PHY_EP_IN.transfer_type,
-    .bmAttributes.synchronization_type = USBD_CONTROL_PHY_EP_IN.synchronization_type,
-    .bmAttributes.usage_type = USBD_CONTROL_PHY_EP_IN.usage_type,
+    .bmAttributes.transfer_type = USBD_CONTROL_EP_PHY_IN.transfer_type,
+    .bmAttributes.synchronization_type = USBD_CONTROL_EP_PHY_IN.synchronization_type,
+    .bmAttributes.usage_type = USBD_CONTROL_EP_PHY_IN.usage_type,
     .bmAttributes.reserved_7_6 = 0,
-    .wMaxPacketSize.max_packet_size = USBD_CONTROL_PHY_EP_IN.max_packet_size_bytes,
+    .wMaxPacketSize.max_packet_size = USBD_CONTROL_EP_PHY_IN.max_packet_size_bytes,
     .wMaxPacketSize.transaction_per_microframe = 0,
     .wMaxPacketSize.reserved_15_13 = 0,
     .bInterval = 1
 };
 
 static const USB_endpoint_t USBD_CONTROL_EP_OUT = {
-    .descriptor = &USBD_CONTROL_PHY_EP_OUT_DESCRIPTOR,
-    .physical_endpoint = &USBD_CONTROL_PHY_EP_OUT
+    .descriptor = &USBD_CONTROL_EP_PHY_OUT_DESCRIPTOR,
+    .physical_endpoint = &USBD_CONTROL_EP_PHY_OUT
 };
 
 static const USB_endpoint_t USBD_CONTROL_EP_IN = {
-    .descriptor = &USBD_CONTROL_PHY_EP_IN_DESCRIPTOR,
-    .physical_endpoint = &USBD_CONTROL_PHY_EP_IN
+    .descriptor = &USBD_CONTROL_EP_PHY_IN_DESCRIPTOR,
+    .physical_endpoint = &USBD_CONTROL_EP_PHY_IN
 };
 
 static const USB_endpoint_t* const USBD_CONTROL_EP_LIST[USBD_CONTROL_ENDPOINT_INDEX_LAST] = {
@@ -200,6 +200,8 @@ static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* u
         break;
     default:
         // Unsupported request.
+        (*request_operation) = USB_REQUEST_OPERATION_NOT_SUPPORTED;
+        // Return error.
         status = USBD_CONTROL_ERROR_BREQUEST;
         goto errors;
     }
@@ -213,13 +215,13 @@ static void _USBD_CONTROL_setup_callback(USB_request_operation_t* setup_request_
     USBD_CONTROL_status_t status = USBD_CONTROL_SUCCESS;
     USBD_status_t usbd_status = USBD_SUCCESS;
     // Read data.
-    usbd_status = USBD_HW_read((USB_physical_endpoint_t*) &USBD_CONTROL_PHY_EP_OUT, &usbd_control_ctx.data_out);
+    usbd_status = USBD_HW_read((USB_physical_endpoint_t*) &USBD_CONTROL_EP_PHY_OUT, &usbd_control_ctx.data_out);
     USBD_exit_error(USBD_CONTROL_ERROR_BASE_HW_INTERFACE);
     // Decode request.
     status = _USBD_CONTROL_decode_standard_request(&usbd_control_ctx.data_out, setup_request_type, &usbd_control_ctx.data_in);
     if (status != USBD_CONTROL_SUCCESS) goto errors;
     // Write data.
-    usbd_status = USBD_HW_write((USB_physical_endpoint_t*) &USBD_CONTROL_PHY_EP_IN, &usbd_control_ctx.data_in);
+    usbd_status = USBD_HW_write((USB_physical_endpoint_t*) &USBD_CONTROL_EP_PHY_IN, &usbd_control_ctx.data_in);
     USBD_exit_error(USBD_CONTROL_ERROR_BASE_HW_INTERFACE);
 errors:
     return;
