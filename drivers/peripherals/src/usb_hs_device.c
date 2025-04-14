@@ -313,8 +313,7 @@ static void _USB_HS_DEVICE_data_endpoint_irq_callback(uint8_t ep_phy) {
     }
 }
 
-/*****************************************usb_hs_device_ram_data.ep_cs_list[ep0_out_cs_index].active = 0;
-        usb_hs_device_ram_data.ep_cs_list[ep0_out_cs_index].stall = 0;**************************/
+/*******************************************************************/
 static USB_HS_DEVICE_status_t _USB_HS_DEVICE_ram_malloc(uint32_t ram_size_bytes, uint32_t* ram_address_offset_blocks) {
     // Local variables.
     USB_HS_DEVICE_status_t status = USB_HS_DEVICE_SUCCESS;

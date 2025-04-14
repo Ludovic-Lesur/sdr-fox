@@ -14,6 +14,10 @@
 
 #define USB_SETUP_PACKET_SIZE_BYTES     8
 
+#define USB_LS_CONTROL_PACKET_SIZE_MAX  8
+#define USB_FS_CONTROL_PACKET_SIZE_MAX  64
+#define USB_HS_CONTROL_PACKET_SIZE_MAX  64
+
 /*** USB structures ***/
 
 /*!******************************************************************

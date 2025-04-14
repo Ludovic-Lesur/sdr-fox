@@ -11,6 +11,7 @@
 #include "types/usb_device.h"
 #include "types/usb_types.h"
 #include "usb_device_configuration.h"
+#include "version.h"
 
 /*** USB DEVICE DESCRIPTOR local macros ***/
 
@@ -33,13 +34,13 @@ const USB_device_descriptor_t USB_DEVICE_DESCRIPTOR = {
     .bLength = sizeof(USB_device_descriptor_t),
     .bDescriptorType = USB_DESCRIPTOR_TYPE_DEVICE,
     .bcdUSB = USB_DESCRIPTOR_USB_VERSION,
-    .bDeviceClass = USB_CLASS_CODE_VENDOR_SPECIFIC,
+    .bDeviceClass = USB_CLASS_CODE_USE_INTERFACE,
     .bDeviceSubClass = 0,
-    .bDeviceProtocol = USB_DESCRIPTOR_PROTOCOL_CUSTOM,
-    .bMaxPacketSize0 = 64,
+    .bDeviceProtocol = 0,
+    .bMaxPacketSize0 = USB_HS_CONTROL_PACKET_SIZE_MAX,
     .idVendor = USB_DESCRIPTOR_ID_VENDOR,
     .idProduct = USB_DESCRIPTOR_ID_PRODUCT,
-    .bcdDevice = 0x0000,
+    .bcdDevice = ((GIT_MAJOR_VERSION << 16) + GIT_MINOR_VERSION),
     .iManufacturer = USB_STRING_DESCRIPTOR_INDEX_MANUFACTURER,
     .iProduct = USB_STRING_DESCRIPTOR_INDEX_PRODUCT,
     .iSerialNumber = USB_STRING_DESCRIPTOR_INDEX_SERIAL_NUMBER,
@@ -53,7 +54,7 @@ const USB_device_qualifier_descriptor_t USB_DEVICE_QUALIFIER_DESCRIPTOR = {
     .bDeviceClass = USB_CLASS_CODE_VENDOR_SPECIFIC,
     .bDeviceSubClass = 0,
     .bDeviceProtocol = USB_DESCRIPTOR_PROTOCOL_CUSTOM,
-    .bMaxPacketSize0 = 64,
+    .bMaxPacketSize0 = USB_HS_CONTROL_PACKET_SIZE_MAX,
     .bNumConfigurations = USB_CONFIGURATION_INDEX_LAST,
     .bReserved = 0
 };
