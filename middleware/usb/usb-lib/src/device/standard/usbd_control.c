@@ -160,7 +160,7 @@ static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* u
         goto errors;
     }
     // Check data size.
-    if ((usb_data_out->data_size_bytes) < sizeof(USB_request_t)) {
+    if ((usb_data_out->size_bytes) < sizeof(USB_request_t)) {
         status = USBD_CONTROL_ERROR_STANDARD_REQUEST_SIZE;
         goto errors;
     }
@@ -168,7 +168,7 @@ static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* u
     (*request_operation) = USB_REQUEST_OPERATION_NOT_SUPPORTED;
     // Reset output data.
     usb_data_in->data = NULL;
-    usb_data_in->data_size_bytes = 0;
+    usb_data_in->size_bytes = 0;
     // Cast frame.
     request_packet = (USB_request_t*) (usb_data_out->data);
     // Compute transfer type.
@@ -187,11 +187,11 @@ static USBD_CONTROL_status_t _USBD_CONTROL_decode_standard_request(USB_data_t* u
     switch (request_packet->bRequest) {
     case USB_REQUEST_ID_GET_DESCRIPTOR:
         // Read descriptor.
-        status = usbd_control_ctx.data_callbacks->get_descriptor((request_packet->wValue).descriptor_type, (request_packet->wValue).descriptor_index, &(usb_data_in->data), &(usb_data_in->data_size_bytes));
+        status = usbd_control_ctx.data_callbacks->get_descriptor((request_packet->wValue).descriptor_type, (request_packet->wValue).descriptor_index, &(usb_data_in->data), &(usb_data_in->size_bytes));
         if (status != USBD_CONTROL_SUCCESS) goto errors;
         // Clamp data size according to request.
-        if ((usb_data_in->data_size_bytes) > (request_packet->wLength)) {
-            (usb_data_in->data_size_bytes) = (request_packet->wLength);
+        if ((usb_data_in->size_bytes) > (request_packet->wLength)) {
+            (usb_data_in->size_bytes) = (request_packet->wLength);
         }
         break;
     case USB_REQUEST_ID_SET_ADDRESS:

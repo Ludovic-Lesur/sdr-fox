@@ -26,7 +26,7 @@
  *******************************************************************/
 typedef struct {
     uint8_t* data;
-    uint32_t data_size_bytes;
+    uint32_t size_bytes;
 } USB_data_t;
 
 #endif /* __USB_TYPES_H__ */
