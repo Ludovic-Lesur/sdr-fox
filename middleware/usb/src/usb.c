@@ -7,7 +7,6 @@
 
 #include "usb.h"
 
-#include "device/class/usbd_cdc.h"
 #include "device/standard/usbd_control.h"
 #include "device/usbd.h"
 #include "error.h"
@@ -41,7 +40,7 @@ static USBD_CONTROL_status_t _USB_get_descriptor(USB_descriptor_type_t type, uin
 
 /*** USB local global variables ***/
 
-static const USBD_CONTROL_data_callbacks_t USBD_CONTROL_CALLBACKS = {
+static const USBD_CONTROL_requests_callbacks_t USBD_CONTROL_CALLBACKS = {
     .get_descriptor = &_USB_get_descriptor
 };
 
@@ -147,7 +146,7 @@ USB_status_t USB_init(void) {
     usbd_status = USBD_init();
     USBD_exit_error(USB_ERROR_BASE_USBD);
     // Init control interface.
-    usbd_control_status = USBD_CONTROL_init((USBD_CONTROL_data_callbacks_t*) &USBD_CONTROL_CALLBACKS);
+    usbd_control_status = USBD_CONTROL_init((USBD_CONTROL_requests_callbacks_t*) &USBD_CONTROL_CALLBACKS);
     USBD_CONTROL_exit_error(USB_ERROR_BASE_USBD_CONTROL);
 errors:
     return status;

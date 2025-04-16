@@ -10,7 +10,6 @@
 
 #include "device/usbd.h"
 #include "device/standard/usbd_control.h"
-#include "device/class/usbd_cdc.h"
 #include "error.h"
 #include "strings.h"
 #include "types.h"
@@ -25,9 +24,8 @@ typedef enum {
     USB_ERROR_BASE_STRING = ERROR_BASE_STEP,
     USB_ERROR_BASE_USBD = (USB_ERROR_BASE_STRING + STRING_ERROR_BASE_LAST),
     USB_ERROR_BASE_USBD_CONTROL = (USB_ERROR_BASE_USBD + USBD_ERROR_BASE_LAST),
-    USB_ERROR_BASE_USBD_CDC = (USB_ERROR_BASE_USBD_CONTROL + USBD_CONTROL_ERROR_BASE_LAST),
     // Last base value.
-    USB_ERROR_LAST = (USB_ERROR_BASE_USBD_CDC + USBD_CDC_ERROR_BASE_LAST)
+    USB_ERROR_LAST = (USB_ERROR_BASE_USBD_CONTROL + USBD_CONTROL_ERROR_BASE_LAST),
 } USB_status_t;
 
 /*** USB functions ***/
