@@ -34,6 +34,8 @@ typedef enum {
  *******************************************************************/
 typedef enum {
     USB_INTERFACE_INDEX_CONTROL = 0,
+    USB_INTERFACE_INDEX_CDC_COM,
+    USB_INTERFACE_INDEX_CDC_DATA,
     USB_INTERFACE_INDEX_LAST
 } USB_interface_index_t;
 

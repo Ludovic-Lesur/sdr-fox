@@ -7,6 +7,7 @@
 
 #include "usb.h"
 
+#include "device/class/usbd_cdc.h"
 #include "device/standard/usbd_control.h"
 #include "device/usbd.h"
 #include "error.h"
@@ -37,11 +38,13 @@ typedef struct {
 /*** USB local functions declaration ***/
 
 static USBD_CONTROL_status_t _USB_get_descriptor(USB_descriptor_type_t type, uint8_t index, uint8_t** descriptor_ptr, uint32_t* descriptor_size_bytes);
+static USBD_CONTROL_status_t _USB_set_configuration(uint8_t index);
 
 /*** USB local global variables ***/
 
-static const USBD_CONTROL_requests_callbacks_t USBD_CONTROL_CALLBACKS = {
-    .get_descriptor = &_USB_get_descriptor
+static const USBD_CONTROL_requests_callbacks_t USBD_CONTROL_REQUESTS_CALLBACKS = {
+    .get_descriptor = &_USB_get_descriptor,
+    .set_configuration = &_USB_set_configuration
 };
 
 static USB_context_t usb_ctx;
@@ -100,6 +103,14 @@ errors:
     return status;
 }
 
+/*******************************************************************/
+static USBD_CONTROL_status_t _USB_set_configuration(uint8_t index) {
+    // Unused parameter.
+    UNUSED(index);
+    // Nothing to so since the device has only one configuration.
+    return USBD_CONTROL_SUCCESS;
+}
+
 /*** USB functions ***/
 
 /*******************************************************************/
@@ -146,7 +157,7 @@ USB_status_t USB_init(void) {
     usbd_status = USBD_init();
     USBD_exit_error(USB_ERROR_BASE_USBD);
     // Init control interface.
-    usbd_control_status = USBD_CONTROL_init((USBD_CONTROL_requests_callbacks_t*) &USBD_CONTROL_CALLBACKS);
+    usbd_control_status = USBD_CONTROL_init((USBD_CONTROL_requests_callbacks_t*) &USBD_CONTROL_REQUESTS_CALLBACKS);
     USBD_CONTROL_exit_error(USB_ERROR_BASE_USBD_CONTROL);
 errors:
     return status;

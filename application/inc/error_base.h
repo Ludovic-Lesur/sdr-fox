@@ -25,7 +25,8 @@ typedef enum {
     // Middleware.
     ERROR_BASE_USB = 0x10000000,
     ERROR_BASE_USBD = 0x10010000,
-    ERROR_BASE_USBD_CONTROL = 0x10020000
+    ERROR_BASE_USBD_CONTROL = 0x10020000,
+    ERROR_BASE_USBD_CDC = 0x10030000,
 } ERROR_base_t;
 
 #endif /* __ERROR_BASE_H__ */

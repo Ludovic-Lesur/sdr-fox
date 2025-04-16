@@ -7,12 +7,15 @@
 
 #include "usb_device_configuration.h"
 
+#include "device/class/usbd_cdc.h"
 #include "device/standard/usbd_control.h"
 
 /*** USB DEVICE CONFIGURATION global variables ***/
 
 const USB_interface_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_INTERFACE_INDEX_LAST] = {
     &USBD_CONTROL_INTERFACE,
+    &USBD_CDC_COM_INTERFACE,
+    &USBD_CDC_DATA_INTERFACE
 };
 
 const USB_configuration_t USB_CONFIGURATION = {
