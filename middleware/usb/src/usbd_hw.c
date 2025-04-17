@@ -7,11 +7,11 @@
 
 #include "device/usbd_hw.h"
 
+#include "common/usb_endpoint.h"
 #include "device/usbd.h"
 #include "error.h"
 #include "error_base.h"
 #include "nvic_priority.h"
-#include "types/usb_endpoint.h"
 #include "types.h"
 #include "usb_hs_device.h"
 

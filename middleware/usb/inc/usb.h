@@ -14,7 +14,6 @@
 #include "error.h"
 #include "strings.h"
 #include "types.h"
-#include "types/usb_types.h"
 
 /*** USB structures ***/
 

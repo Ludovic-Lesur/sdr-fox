@@ -8,8 +8,7 @@
 #ifndef __USB_LIB_FLAGS_H__
 #define __USB_LIB_FLAGS_H__
 
-#include "usb_device_configuration.h"
-#include "usb_device_descriptor.h"
+#include "usb_device_sdr_fox.h"
 #include "usb_hs_device.h"
 
 /*** USB library compilation flags ***/

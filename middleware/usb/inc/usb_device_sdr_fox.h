@@ -8,14 +8,8 @@
 #ifndef __USB_DEVICE_CONFIGURATION_H__
 #define __USB_DEVICE_CONFIGURATION_H__
 
+#include "common/usb_device.h"
 #include "types.h"
-#include "types/usb_configuration.h"
-#include "types/usb_interface.h"
-#include "types/usb_types.h"
-
-/*** USB CONFIGURATION macros ***/
-
-#define USB_CONFIGURATION_MAX_POWER_MA  500
 
 /*** USB CONFIGURATION structures ***/
 
@@ -39,10 +33,24 @@ typedef enum {
     USB_INTERFACE_INDEX_LAST
 } USB_interface_index_t;
 
+/*!******************************************************************
+ * \enum USB_string_descriptor_index_t
+ * \brief USB string descriptors index.
+ *******************************************************************/
+typedef enum {
+    USB_STRING_DESCRIPTOR_INDEX_LANGUAGE_ID = 0,
+    USB_STRING_DESCRIPTOR_INDEX_MANUFACTURER,
+    USB_STRING_DESCRIPTOR_INDEX_PRODUCT,
+    USB_STRING_DESCRIPTOR_INDEX_SERIAL_NUMBER,
+    USB_STRING_DESCRIPTOR_INDEX_CONFIGURATION,
+    USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CONTROL,
+    USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CDC_COM,
+    USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CDC_DATA,
+    USB_STRING_DESCRIPTOR_INDEX_LAST
+} USB_string_descriptor_index_t;
+
 /*** USB CONFIGURATION global variables ***/
 
-extern const USB_interface_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_INTERFACE_INDEX_LAST];
-
-extern const USB_configuration_t USB_CONFIGURATION;
+extern const USB_device_t USB_DEVICE_SDR_FOX;
 
 #endif /* __USB_DEVICE_CONFIGURATION_H__ */
