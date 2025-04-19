@@ -53,12 +53,16 @@ USB_status_t USB_init(void) {
     USB_status_t status = USB_SUCCESS;
     USBD_status_t usbd_status = USBD_SUCCESS;
     USBD_CONTROL_status_t usbd_control_status = USBD_CONTROL_SUCCESS;
+    USBD_CDC_status_t usbd_cdc_status = USBD_CDC_SUCCESS;
     // Init USB device library.
     usbd_status = USBD_init();
     USBD_exit_error(USB_ERROR_BASE_USBD);
     // Init control interface.
     usbd_control_status = USBD_CONTROL_init(&USB_DEVICE_SDR_FOX, (USBD_CONTROL_requests_callbacks_t*) &USBD_CONTROL_REQUESTS_CALLBACKS);
     USBD_CONTROL_exit_error(USB_ERROR_BASE_USBD_CONTROL);
+    // Init CDC class.
+    usbd_cdc_status = USBD_CDC_init();
+    USBD_CDC_exit_error(USB_ERROR_BASE_USBD_CDC);
 errors:
     return status;
 }
@@ -69,6 +73,10 @@ USB_status_t USB_de_init(void) {
     USB_status_t status = USB_SUCCESS;
     USBD_status_t usbd_status = USBD_SUCCESS;
     USBD_CONTROL_status_t usbd_control_status = USBD_CONTROL_SUCCESS;
+    USBD_CDC_status_t usbd_cdc_status = USBD_CDC_SUCCESS;
+    // Release CDC class.
+    usbd_cdc_status = USBD_CDC_de_init();
+    USBD_CDC_exit_error(USB_ERROR_BASE_USBD_CDC);
     // Release control interface.
     usbd_control_status = USBD_CONTROL_de_init();
     USBD_CONTROL_exit_error(USB_ERROR_BASE_USBD_CONTROL);

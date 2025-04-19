@@ -17,6 +17,10 @@
 
 /*** USB structures ***/
 
+/*!******************************************************************
+ * \enum USB_status_t
+ * \brief USB driver error codes.
+ *******************************************************************/
 typedef enum {
     // Driver errors.
     USB_SUCCESS = 0,
