@@ -8,7 +8,7 @@
 #ifndef __USB_LIB_FLAGS_H__
 #define __USB_LIB_FLAGS_H__
 
-#include "usb_device_sdr_fox.h"
+#include "usb_configuration_sdr_fox.h"
 #include "usb_hs_device.h"
 
 /*** USB library compilation flags ***/
@@ -21,10 +21,10 @@
 #define USBD_CDC
 
 #ifdef USBD_CDC
-#define USBD_CDC_COM_INTERFACE_INDEX                        USB_INTERFACE_INDEX_CDC_COM
-#define USBD_CDC_COM_INTERFACE_STRING_DESCRIPTOR_INDEX      USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CDC_DATA
-#define USBD_CDC_COM_ENDPOINT_NUMBER                        1
-#define USBD_CDC_COM_PACKET_SIZE_BYTES                      16
+#define USBD_CDC_COMM_INTERFACE_INDEX                       USB_INTERFACE_INDEX_CDC_COMM
+#define USBD_CDC_COMM_INTERFACE_STRING_DESCRIPTOR_INDEX     USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CDC_COMM
+#define USBD_CDC_COMM_ENDPOINT_NUMBER                       1
+#define USBD_CDC_COMM_PACKET_SIZE_BYTES                     16
 
 #define USBD_CDC_DATA_INTERFACE_INDEX                       USB_INTERFACE_INDEX_CDC_DATA
 #define USBD_CDC_DATA_INTERFACE_STRING_DESCRIPTOR_INDEX     USB_STRING_DESCRIPTOR_INDEX_INTERFACE_CDC_DATA

@@ -14,7 +14,7 @@
 #include "syscon.h"
 #include "systick.h"
 #include "types.h"
-#include "usb.h"
+#include "usb_device_sdr_fox.h"
 
 /*** MAIN functions ***/
 
@@ -23,7 +23,7 @@ static void _SDR_FOX_init_hw(void) {
     // Local variables.
     SYSCON_status_t syscon_status = SYSCON_SUCCESS;
     SYSTICK_status_t systick_status = SYSTICK_SUCCESS;
-    USB_status_t usb_status = USB_SUCCESS;
+    USB_DEVICE_SDR_FOX_status_t usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_SUCCESS;
     SYSCON_pll_configuration_t pll1_config;
     // Init error stack
     ERROR_stack_init();
@@ -50,14 +50,14 @@ static void _SDR_FOX_init_hw(void) {
     systick_status = SYSTICK_init(SYSTICK_CORE_CPU0, SYSTICK_CLOCK_SOURCE_32K_OSC, 1, NVIC_PRIORITY_SYSTICK);
     SYSTICK_stack_error(ERROR_BASE_SYSTICK);
     // Init USB interface.
-    usb_status = USB_init();
-    USB_stack_error(ERROR_BASE_USB);
+    usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_init();
+    USB_DEVICE_SDR_FOX_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX);
 }
 
 /*******************************************************************/
 int main(void) {
     // Local variables.
-    USB_status_t usb_status = USB_SUCCESS;
+    USB_DEVICE_SDR_FOX_status_t usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_SUCCESS;
     // Init board.
     _SDR_FOX_init_hw();
     // Configure LED pin.
@@ -68,8 +68,8 @@ int main(void) {
     GPIO_write(&GPIO_LED_GREEN, 1);
     GPIO_write(&GPIO_LED_BLUE, 1);
     // Start USB device.
-    usb_status = USB_start();
-    USB_stack_error(ERROR_BASE_USB);
+    usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_start();
+    USB_DEVICE_SDR_FOX_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX);
     // Main loop.
     while (1);
     return 0;
