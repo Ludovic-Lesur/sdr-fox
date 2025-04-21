@@ -130,30 +130,42 @@ errors:
 }
 
 /*******************************************************************/
-USB_status_t USBD_HW_write(USB_physical_endpoint_t* endpoint, USB_data_t* usb_data_in) {
+USB_status_t USBD_HW_write_data(USB_physical_endpoint_t* endpoint, USB_data_t* usb_data_in) {
     // Local variables.
     USB_status_t status = USB_SUCCESS;
     USB_HS_DEVICE_status_t usb_hs_device_status = USB_HS_DEVICE_SUCCESS;
     USB_HS_DEVICE_endpoint_t usb_hs_device_endpoint;
     // Create endpoint structure.
     _USBD_HW_create_endpoint();
-    // Stop high-speed device controller.
-    usb_hs_device_status = USB_HS_DEVICE_write(&usb_hs_device_endpoint, (usb_data_in->data), (usb_data_in->size_bytes));
+    // Write data byte to high-speed device controller.
+    usb_hs_device_status = USB_HS_DEVICE_write_data(&usb_hs_device_endpoint, (usb_data_in->data), (usb_data_in->size_bytes));
     USB_HS_DEVICE_exit_error(USB_ERROR_BASE_HW_INTERFACE);
 errors:
     return status;
 }
 
 /*******************************************************************/
-USB_status_t USBD_HW_read(USB_physical_endpoint_t* endpoint, USB_data_t* usb_data_out) {
+USB_status_t USBD_HW_read_data(USB_physical_endpoint_t* endpoint, USB_data_t* usb_data_out) {
     // Local variables.
     USB_status_t status = USB_SUCCESS;
     USB_HS_DEVICE_status_t usb_hs_device_status = USB_HS_DEVICE_SUCCESS;
     USB_HS_DEVICE_endpoint_t usb_hs_device_endpoint;
     // Create endpoint structure.
     _USBD_HW_create_endpoint();
-    // Stop high-speed device controller.
-    usb_hs_device_status = USB_HS_DEVICE_read(&usb_hs_device_endpoint, &(usb_data_out->data), &(usb_data_out->size_bytes));
+    // Read data from high-speed device controller.
+    usb_hs_device_status = USB_HS_DEVICE_read_data(&usb_hs_device_endpoint, &(usb_data_out->data), &(usb_data_out->size_bytes));
+    USB_HS_DEVICE_exit_error(USB_ERROR_BASE_HW_INTERFACE);
+errors:
+    return status;
+}
+
+/*******************************************************************/
+USB_status_t USBD_HW_read_setup(USB_data_t* usb_setup_out) {
+    // Local variables.
+    USB_status_t status = USB_SUCCESS;
+    USB_HS_DEVICE_status_t usb_hs_device_status = USB_HS_DEVICE_SUCCESS;
+    // Read setup bytes from high-speed device controller.
+    usb_hs_device_status = USB_HS_DEVICE_read_setup(&(usb_setup_out->data), &(usb_setup_out->size_bytes));
     USB_HS_DEVICE_exit_error(USB_ERROR_BASE_HW_INTERFACE);
 errors:
     return status;
