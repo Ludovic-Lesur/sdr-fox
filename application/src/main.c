@@ -5,6 +5,7 @@
  *      Author: Ludo
  */
 
+#include "cli.h"
 #include "error.h"
 #include "error_base.h"
 #include "gpio.h"
@@ -24,6 +25,7 @@ static void _SDR_FOX_init_hw(void) {
     SYSCON_status_t syscon_status = SYSCON_SUCCESS;
     SYSTICK_status_t systick_status = SYSTICK_SUCCESS;
     USB_DEVICE_SDR_FOX_status_t usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_SUCCESS;
+    CLI_status_t cli_status = CLI_SUCCESS;
     SYSCON_pll_configuration_t pll1_config;
     // Init error stack
     ERROR_stack_init();
@@ -52,12 +54,16 @@ static void _SDR_FOX_init_hw(void) {
     // Init USB interface.
     usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_init();
     USB_DEVICE_SDR_FOX_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX);
+    // Init command line.
+    cli_status = CLI_init();
+    CLI_stack_error(ERROR_BASE_CLI);
 }
 
 /*******************************************************************/
 int main(void) {
     // Local variables.
     USB_DEVICE_SDR_FOX_status_t usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_SUCCESS;
+    CLI_status_t cli_status = CLI_SUCCESS;
     // Init board.
     _SDR_FOX_init_hw();
     // Configure LED pin.
@@ -71,6 +77,10 @@ int main(void) {
     usb_device_sdr_fox_status = USB_DEVICE_SDR_FOX_start();
     USB_DEVICE_SDR_FOX_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX);
     // Main loop.
-    while (1);
+    while (1) {
+        // Process commands.
+        cli_status = CLI_process();
+        CLI_stack_error(ERROR_BASE_CLI);
+    }
     return 0;
 }

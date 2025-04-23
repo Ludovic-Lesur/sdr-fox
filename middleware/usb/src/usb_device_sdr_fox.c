@@ -14,6 +14,8 @@
 #include "device/class/usbd_cdc.h"
 #include "device/standard/usbd_control.h"
 #include "device/usbd.h"
+#include "error.h"
+#include "error_base.h"
 #include "version.h"
 
 /*** USB DEVICE CONFIGURATION local macros ***/
@@ -25,15 +27,7 @@
 
 /*** USB local functions declaration ***/
 
-// Control requests callbacks.
 static USB_status_t _USB_DEVICE_SDR_FOX_set_configuration(uint8_t index);
-// CDC requests callbacks.
-static USB_status_t _USB_DEVICE_SDR_FOX_set_serial_port_configuration(USB_CDC_serial_port_configuration_t* configuration);
-static USB_status_t _USB_DEVICE_SDR_FOX_get_serial_port_configuration(USB_CDC_serial_port_configuration_t* configuration);
-static USB_status_t _USB_DEVICE_SDR_FOX_set_serial_port_state(uint8_t rts, uint8_t dtr);
-static USB_status_t _USB_DEVICE_SDR_FOX_send_break(void);
-static USB_status_t _USB_DEVICE_SDR_FOX_rx_completion(uint8_t data);
-static USB_status_t _USB_DEVICE_SDR_FOX_tx_completion(void);
 
 /*** USB DEVICE DESCRIPTOR local global variables ***/
 
@@ -134,61 +128,12 @@ static const USBD_CONTROL_callbacks_t USB_DEVICE_SDR_FOX_CONTROL_CALLBACKS = {
     .vendor_request = NULL
 };
 
-static const USBD_CDC_callbacks_t USB_DEVICE_SDR_FOX_CDC_CALLBACKS = {
-    .set_serial_port_configuration_request = &_USB_DEVICE_SDR_FOX_set_serial_port_configuration,
-    .get_serial_port_configuration_request = &_USB_DEVICE_SDR_FOX_get_serial_port_configuration,
-    .set_serial_port_state = &_USB_DEVICE_SDR_FOX_set_serial_port_state,
-    .send_break = &_USB_DEVICE_SDR_FOX_send_break,
-    .rx_completion = &_USB_DEVICE_SDR_FOX_rx_completion,
-    .tx_completion = &_USB_DEVICE_SDR_FOX_tx_completion
-};
-
 /*** USB DEVICE SDR FOX local functions ***/
 
 /*******************************************************************/
 static USB_status_t _USB_DEVICE_SDR_FOX_set_configuration(uint8_t index) {
     // Nothing to so since the device has only one configuration.
     UNUSED(index);
-    return USB_SUCCESS;
-}
-
-/*******************************************************************/
-static USB_status_t _USB_DEVICE_SDR_FOX_set_serial_port_configuration(USB_CDC_serial_port_configuration_t* configuration) {
-    // Nothing to do as there is no physical UART connected to the CDC interface.
-    UNUSED(configuration);
-    return USB_SUCCESS;
-}
-
-/*******************************************************************/
-static USB_status_t _USB_DEVICE_SDR_FOX_get_serial_port_configuration(USB_CDC_serial_port_configuration_t* configuration) {
-    // Nothing to do as there is no physical UART connected to the CDC interface.
-    UNUSED(configuration);
-    return USB_SUCCESS;
-}
-
-/*******************************************************************/
-static USB_status_t _USB_DEVICE_SDR_FOX_set_serial_port_state(uint8_t rts, uint8_t dtr) {
-    // Nothing to do as there is no physical UART connected to the CDC interface.
-    UNUSED(rts);
-    UNUSED(dtr);
-    return USB_SUCCESS;
-}
-
-/*******************************************************************/
-static USB_status_t _USB_DEVICE_SDR_FOX_send_break(void) {
-    // Nothing to do as there is no physical UART connected to the CDC interface.
-    return USB_SUCCESS;
-}
-
-/*******************************************************************/
-static USB_status_t _USB_DEVICE_SDR_FOX_rx_completion(uint8_t data) {
-    // TODO
-    UNUSED(data);
-    return USB_SUCCESS;
-}
-
-static USB_status_t _USB_DEVICE_SDR_FOX_tx_completion(void) {
-    // TODO
     return USB_SUCCESS;
 }
 
@@ -205,9 +150,6 @@ USB_DEVICE_SDR_FOX_status_t USB_DEVICE_SDR_FOX_init(void) {
     // Init control interface.
     usb_status = USBD_CONTROL_init(&USB_DEVICE_SDR_FOX, (USBD_CONTROL_callbacks_t*) &USB_DEVICE_SDR_FOX_CONTROL_CALLBACKS);
     USB_exit_error(USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
-    // Init CDC class.
-    usb_status = USBD_CDC_init((USBD_CDC_callbacks_t*) &USB_DEVICE_SDR_FOX_CDC_CALLBACKS);
-    USB_exit_error(USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
 errors:
     return status;
 }
@@ -217,16 +159,12 @@ USB_DEVICE_SDR_FOX_status_t USB_DEVICE_SDR_FOX_de_init(void) {
     // Local variables.
     USB_DEVICE_SDR_FOX_status_t status = USB_DEVICE_SDR_FOX_SUCCESS;
     USB_status_t usb_status = USB_SUCCESS;
-    // Release CDC class.
-    usb_status = USBD_CDC_de_init();
-    USB_exit_error(USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
     // Release control interface.
     usb_status = USBD_CONTROL_de_init();
-    USB_exit_error(USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
+    USB_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX + USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
     // Release USB device library.
     usb_status = USBD_de_init();
-    USB_exit_error(USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
-errors:
+    USB_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX + USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
     return status;
 }
 
