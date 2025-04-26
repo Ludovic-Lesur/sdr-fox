@@ -153,7 +153,7 @@ TERMINAL_status_t TERMINAL_HW_write(uint8_t instance, uint8_t* data, uint32_t da
     USB_status_t usb_status = USB_SUCCESS;
     // Unused parameter.
     UNUSED(instance);
-    // Write data over USART.
+    // Write data over CDC interface.
     usb_status = USBD_CDC_write(data, data_size_bytes);
     USB_exit_error(TERMINAL_ERROR_BASE_HW_INTERFACE);
 errors:

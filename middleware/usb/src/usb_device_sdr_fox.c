@@ -12,6 +12,7 @@
 #include "common/usb_descriptor.h"
 #include "common/usb_interface.h"
 #include "device/class/usbd_cdc.h"
+#include "device/class/usbd_uac.h"
 #include "device/standard/usbd_control.h"
 #include "device/usbd.h"
 #include "error.h"
@@ -39,6 +40,9 @@ static const char_t USB_DESCRIPTOR_CONFIGURATION[] = "SDR platfom";
 static const char_t USB_DESCRIPTOR_INTERFACE_CONTROL[] = "USB control interface";
 static const char_t USB_DESCRIPTOR_INTERFACE_CDC_COMM[] = "Radio control interface (COMM)";
 static const char_t USB_DESCRIPTOR_INTERFACE_CDC_DATA[] = "Radio control interface (DATA)";
+static const char_t USB_DESCRIPTOR_INTERFACE_UAC_CONTROL[] = "I/Q transfer control interface (CONTROL)";
+static const char_t USB_DESCRIPTOR_INTERFACE_UAC_STREAM_PLAY[] = "TX I/Q transfer interface (STREAM PLAY)";
+static const char_t USB_DESCRIPTOR_INTERFACE_UAC_STREAM_RECORD[] = "RX I/Q transfer interface (STREAM RECORD)";
 
 /*** USB DEVICE DESCRIPTOR global variables ***/
 
@@ -93,13 +97,19 @@ static const char_t* const USB_STRING_DESCRIPTOR[USB_STRING_DESCRIPTOR_INDEX_LAS
     USB_DESCRIPTOR_CONFIGURATION,
     USB_DESCRIPTOR_INTERFACE_CONTROL,
     USB_DESCRIPTOR_INTERFACE_CDC_COMM,
-    USB_DESCRIPTOR_INTERFACE_CDC_DATA
+    USB_DESCRIPTOR_INTERFACE_CDC_DATA,
+    USB_DESCRIPTOR_INTERFACE_UAC_CONTROL,
+    USB_DESCRIPTOR_INTERFACE_UAC_STREAM_PLAY,
+    USB_DESCRIPTOR_INTERFACE_UAC_STREAM_RECORD
 };
 
 static const USB_interface_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_INTERFACE_INDEX_LAST] = {
     &USBD_CONTROL_INTERFACE,
     &USBD_CDC_COMM_INTERFACE,
-    &USBD_CDC_DATA_INTERFACE
+    &USBD_CDC_DATA_INTERFACE,
+    &USBD_UAC_CONTROL_INTERFACE,
+    &USBD_UAC_STREAM_PLAY_INTERFACE,
+    &USBD_UAC_STREAM_RECORD_INTERFACE
 };
 
 static const USB_configuration_t USB_CONFIGURATION_SDR_FOX = {
@@ -128,6 +138,8 @@ static const USBD_CONTROL_callbacks_t USB_DEVICE_SDR_FOX_CONTROL_CALLBACKS = {
     .vendor_request = NULL
 };
 
+static const USBD_UAC_callbacks_t USB_DEVICE_SDR_FOX_UAC_CALLBACKS;
+
 /*** USB DEVICE SDR FOX local functions ***/
 
 /*******************************************************************/
@@ -150,6 +162,9 @@ USB_DEVICE_SDR_FOX_status_t USB_DEVICE_SDR_FOX_init(void) {
     // Init control interface.
     usb_status = USBD_CONTROL_init(&USB_DEVICE_SDR_FOX, (USBD_CONTROL_callbacks_t*) &USB_DEVICE_SDR_FOX_CONTROL_CALLBACKS);
     USB_exit_error(USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
+    // Init audio interface.
+    usb_status = USBD_UAC_init((USBD_UAC_callbacks_t*) &USB_DEVICE_SDR_FOX_UAC_CALLBACKS);
+    USB_exit_error(USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
 errors:
     return status;
 }
@@ -159,6 +174,9 @@ USB_DEVICE_SDR_FOX_status_t USB_DEVICE_SDR_FOX_de_init(void) {
     // Local variables.
     USB_DEVICE_SDR_FOX_status_t status = USB_DEVICE_SDR_FOX_SUCCESS;
     USB_status_t usb_status = USB_SUCCESS;
+    // Release audio interface.
+    usb_status = USBD_UAC_de_init();
+    USB_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX + USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
     // Release control interface.
     usb_status = USBD_CONTROL_de_init();
     USB_stack_error(ERROR_BASE_USB_DEVICE_SDR_FOX + USB_DEVICE_SDR_FOX_ERROR_BASE_USB);
