@@ -1,5 +1,5 @@
 /*
- * usb_device_configuration.c
+ * usb_device_sdr_fox.c
  *
  *  Created on: 03 nov. 2024
  *      Author: Ludo
@@ -19,18 +19,34 @@
 #include "error_base.h"
 #include "version.h"
 
-/*** USB DEVICE CONFIGURATION local macros ***/
+/*** USB DEVICE SDR FOX local macros ***/
 
 #define USB_DEVICE_SDR_FOX_ID_VENDOR        0x2CC1
 #define USB_DEVICE_SDR_FOX_ID_PRODUCT       0x0000
 
 #define USB_DEVICE_SDR_FOX_MAX_POWER_MA     500
 
-/*** USB local functions declaration ***/
+/*** USB DEVICE SDR FOX local structures ***/
+
+/*******************************************************************/
+typedef enum {
+    USB_DEVICE_SDR_FOX_INTERFACE_INDEX_CONTROL = 0,
+    USB_DEVICE_SDR_FOX_INTERFACE_INDEX_CDC_COMM,
+    USB_DEVICE_SDR_FOX_INTERFACE_INDEX_CDC_DATA,
+    USB_DEVICE_SDR_FOX_INTERFACE_INDEX_LAST
+} USB_DEVICE_SDR_FOX_interface_index_t;
+
+/*******************************************************************/
+typedef enum {
+    USB_DEVICE_SDR_FOX_INTERFACE_ASSOCIATION_INDEX_UAC = 0,
+    USB_DEVICE_SDR_FOX_INTERFACE_ASSOCIATION_INDEX_LAST
+} USB_DEVICE_SDR_FOX_interface_association_index_t;
+
+/*** USB DEVICE SDR FOX local functions declaration ***/
 
 static USB_status_t _USB_DEVICE_SDR_FOX_set_configuration(uint8_t index);
 
-/*** USB DEVICE DESCRIPTOR local global variables ***/
+/*** USB DEVICE SDR FOX local global variables ***/
 
 static const char_t USB_DESCRIPTOR_LANGUAGE_ID[] = { 0x09, 0x04 };
 static const char_t USB_DESCRIPTOR_MANUFACTURER[] = "Ludovic Lesur";
@@ -40,11 +56,12 @@ static const char_t USB_DESCRIPTOR_CONFIGURATION[] = "SDR platfom";
 static const char_t USB_DESCRIPTOR_INTERFACE_CONTROL[] = "USB control interface";
 static const char_t USB_DESCRIPTOR_INTERFACE_CDC_COMM[] = "Radio control interface (COMM)";
 static const char_t USB_DESCRIPTOR_INTERFACE_CDC_DATA[] = "Radio control interface (DATA)";
+static const char_t USB_DESCRIPTOR_INTERFACE_UAC_INTERFACE_ASSOCIATION[] = "USB audio interfaces association";
 static const char_t USB_DESCRIPTOR_INTERFACE_UAC_CONTROL[] = "I/Q transfer control interface (CONTROL)";
 static const char_t USB_DESCRIPTOR_INTERFACE_UAC_STREAM_PLAY[] = "TX I/Q transfer interface (STREAM PLAY)";
 static const char_t USB_DESCRIPTOR_INTERFACE_UAC_STREAM_RECORD[] = "RX I/Q transfer interface (STREAM RECORD)";
 
-/*** USB DEVICE DESCRIPTOR global variables ***/
+/*** USB DEVICE SDR FOX global variables ***/
 
 static const USB_device_descriptor_t USB_DEVICE_DESCRIPTOR = {
     .bLength = sizeof(USB_device_descriptor_t),
@@ -98,27 +115,30 @@ static const char_t* const USB_STRING_DESCRIPTOR[USB_STRING_DESCRIPTOR_INDEX_LAS
     USB_DESCRIPTOR_INTERFACE_CONTROL,
     USB_DESCRIPTOR_INTERFACE_CDC_COMM,
     USB_DESCRIPTOR_INTERFACE_CDC_DATA,
+    USB_DESCRIPTOR_INTERFACE_UAC_INTERFACE_ASSOCIATION,
     USB_DESCRIPTOR_INTERFACE_UAC_CONTROL,
     USB_DESCRIPTOR_INTERFACE_UAC_STREAM_PLAY,
     USB_DESCRIPTOR_INTERFACE_UAC_STREAM_RECORD
 };
 
-static const USB_interface_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_INTERFACE_INDEX_LAST] = {
+static const USB_interface_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST[USB_DEVICE_SDR_FOX_INTERFACE_INDEX_LAST] = {
     &USBD_CONTROL_INTERFACE,
     &USBD_CDC_COMM_INTERFACE,
     &USBD_CDC_DATA_INTERFACE,
-    &USBD_UAC_CONTROL_INTERFACE,
-    &USBD_UAC_STREAM_PLAY_INTERFACE,
-    &USBD_UAC_STREAM_RECORD_INTERFACE
+};
+
+static const USB_interface_association_t* const USB_CONFIGURATION_SDR_FOX_INTERFACE_ASSOCIATION_LIST[USB_DEVICE_SDR_FOX_INTERFACE_ASSOCIATION_INDEX_LAST] = {
+    &USBD_UAC_INTERFACE_ASSOCIATION
 };
 
 static const USB_configuration_t USB_CONFIGURATION_SDR_FOX = {
     .descriptor = &USB_CONFIGURATION_DESCRIPTOR,
     .interface_list = (const USB_interface_t**) &USB_CONFIGURATION_SDR_FOX_INTERFACE_LIST,
-    .number_of_interfaces = USB_INTERFACE_INDEX_LAST,
+    .number_of_interfaces = USB_DEVICE_SDR_FOX_INTERFACE_INDEX_LAST,
+    .interface_association_list = (const USB_interface_association_t**) USB_CONFIGURATION_SDR_FOX_INTERFACE_ASSOCIATION_LIST,
+    .number_of_interfaces_associations = USB_DEVICE_SDR_FOX_INTERFACE_ASSOCIATION_INDEX_LAST,
     .max_power_ma = USB_DEVICE_SDR_FOX_MAX_POWER_MA,
 };
-
 
 static const USB_configuration_t* USB_CONFIGURATION_LIST[USB_CONFIGURATION_INDEX_LAST] = {
     &USB_CONFIGURATION_SDR_FOX
